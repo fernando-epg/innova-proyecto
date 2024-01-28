@@ -1,3 +1,6 @@
+server:
+  port: 17940
+
 spring:
   application:
     name: Proyecto-integrador

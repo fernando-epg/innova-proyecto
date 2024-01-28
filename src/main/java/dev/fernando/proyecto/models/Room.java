@@ -20,12 +20,13 @@ public class Room {
     public Room() {
     }
     
-    public Room(int roomNumber, String name, boolean isBooked, int numAdults, int numMinors, int totalGuests) {
+    public Room(int roomNumber, String name, int numAdults, int numMinors) {
         this.roomNumber = roomNumber;
         this.name = name;
-        this.isBooked = isBooked;
+        this.isBooked = true;
         this.numAdults = numAdults;
         this.numMinors = numMinors;
+        this.totalGuests = numAdults + numMinors;
     }
     
     public Long getId() {
