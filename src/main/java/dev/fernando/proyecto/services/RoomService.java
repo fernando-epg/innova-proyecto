@@ -43,4 +43,19 @@ public class RoomService implements IRoomService {
     public void delete(Room entity) {
         roomRepository.delete(entity);
     }
+    
+    @Override
+    public List<Room> findActive() {
+        return roomRepository.findActive();
+    }
+    
+    @Override
+    public Optional<Room> findByIdActive(Long id) {
+        return roomRepository.findByIdActive(id);
+    }
+    
+    @Override
+    public void deleteByIdActive(Long id) {
+        roomRepository.deleteByIdActive(id);
+    }
 }

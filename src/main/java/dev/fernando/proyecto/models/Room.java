@@ -1,9 +1,6 @@
 package dev.fernando.proyecto.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Room {
@@ -15,7 +12,9 @@ public class Room {
     private boolean isBooked = false;
     private int numAdults;
     private int numMinors;
+    @Transient
     private int totalGuests;
+    private boolean active;
     
     public Room() {
     }
@@ -27,6 +26,7 @@ public class Room {
         this.numAdults = numAdults;
         this.numMinors = numMinors;
         this.totalGuests = numAdults + numMinors;
+        this.active = true;
     }
     
     public Long getId() {
@@ -67,7 +67,7 @@ public class Room {
     
     public void setNumAdults(int numAdults) {
         this.numAdults = numAdults;
-        calculateTotalGuests();
+//        calculateTotalGuests();
     }
     
     public int getNumMinors() {
@@ -76,11 +76,19 @@ public class Room {
     
     public void setNumMinors(int numMinors) {
         this.numMinors = numMinors;
-        calculateTotalGuests();
+//        calculateTotalGuests();
     }
     
-    private void calculateTotalGuests() {
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+    
+    /*private void calculateTotalGuests() {
         this.totalGuests = this.numAdults + this.numMinors;
+    }*/
+    
+    public int getTotalGuests() {
+        return this.numAdults + this.numMinors;
     }
     
     @Override
@@ -92,7 +100,7 @@ public class Room {
                 ", isBooked=" + isBooked +
                 ", numAdults=" + numAdults +
                 ", numMinors=" + numMinors +
-                ", totalGuests=" + totalGuests +
+                ", totalGuests=" + this.getTotalGuests() +
                 '}';
     }
 }
