@@ -1,7 +1,6 @@
 package dev.fernando.proyecto.models;
 
 import jakarta.persistence.*;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

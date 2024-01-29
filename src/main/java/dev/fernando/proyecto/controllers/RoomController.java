@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,16 +20,6 @@ public class RoomController {
         this.roomService = roomService;
     }
     
-    /*@GetMapping("/all")
-    public ResponseEntity<?> findAllRooms() {
-        Optional<List<Room>> rooms = Optional.ofNullable(roomService.findAll());
-        if (rooms.isPresent()) {
-            return ResponseEntity.ok(rooms.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }*/
-    
     @GetMapping
     public ResponseEntity<?> findAllRoomsActive() {
         Optional<List<Room>> rooms = Optional.ofNullable(roomService.findActive());
@@ -41,15 +30,6 @@ public class RoomController {
         }
     }
     
-    /*@GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id) {
-        Optional<Room> room = roomService.findById(id);
-        if (room.isPresent()) {
-            return ResponseEntity.ok(room);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }*/
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         Optional<Room> room = roomService.findByIdActive(id);
@@ -59,17 +39,6 @@ public class RoomController {
             return ResponseEntity.notFound().build();
         }
     }
-    
-    /*@DeleteMapping("/rooms/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable Long id) {
-        Optional<Room> room = roomService.findById(id);
-        if(room.isPresent()) {
-            roomService.deleteById(id);
-            return ResponseEntity.ok("success");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }*/
     
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id) {
