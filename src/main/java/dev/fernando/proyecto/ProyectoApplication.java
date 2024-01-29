@@ -15,7 +15,7 @@ public class ProyectoApplication {
 		ConfigurableApplicationContext applicationContext =
 				SpringApplication.run(ProyectoApplication.class, args);
 		IRoomService roomService = applicationContext.getBean(IRoomService.class);
-		roomService.save(new Room(101,"Sherlock Holmes",2,0));
+		roomService.save(new Room(101,"Sherlock Holmes",2,0, "2/01/2025"));
 		List<Room> rooms = roomService.findAll();
 		System.out.println(rooms);
 	}

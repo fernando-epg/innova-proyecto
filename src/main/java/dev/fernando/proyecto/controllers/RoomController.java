@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -133,6 +134,9 @@ public class RoomController {
             if(newRoom.getNumMinors() != null) {
                 room.get().setNumMinors(newRoom.getNumMinors());
             }
+            if(newRoom.getDate() != null) {
+                room.get().setDate(newRoom.getDate());
+            }
             roomService.save(room.get());
             return ResponseEntity.ok(roomService.findByIdActive(room.get().getId()));
         } if (roomStatus.isPresent() && room.isEmpty()) {
@@ -144,6 +148,6 @@ public class RoomController {
     
     private boolean invalidEntity(Room room) {
         return room.getRoomNumber() == null || room.getName() == null ||
-                room.getNumAdults() == null || room.getNumMinors() == null;
+                room.getNumAdults() == null || room.getNumMinors() == null || room.getDate() == null;
     }
 }
