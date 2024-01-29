@@ -133,6 +133,6 @@ _Se presume que PostgreSQL ya está instalado_
 * Se pueden tener métodos que realicen acciones de SQL personalizadas [^referencias]
 
 [^referencias]: Referencias: 
-  [Spring JPA @Query example: Custom query in Spring Boot](https://www.bezkoder.com/spring-jpa-query/),
-    [Hibernate - Query Language](https://www.tutorialspoint.com/hibernate/hibernate_query_language.htm),
-      [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
+  [Spring JPA @Query example: Custom query in Spring Boot](https://www.bezkoder.com/spring-jpa-query/) / 
+  [Hibernate - Query Language](https://www.tutorialspoint.com/hibernate/hibernate_query_language.htm) / 
+  [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
