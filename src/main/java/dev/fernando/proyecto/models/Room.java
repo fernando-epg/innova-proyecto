@@ -1,17 +1,20 @@
 package dev.fernando.proyecto.models;
 
 import jakarta.persistence.*;
+import org.antlr.v4.runtime.misc.NotNull;
+
+import static dev.fernando.proyecto.models.EStatus.RESERVED;
 
 @Entity
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int roomNumber;
+    private Integer roomNumber;
     private String name;
-    private boolean isBooked = false;
-    private int numAdults;
-    private int numMinors;
+    private String status;
+    private Integer numAdults;
+    private Integer numMinors;
     @Transient
     private int totalGuests;
     private boolean active;
@@ -19,10 +22,10 @@ public class Room {
     public Room() {
     }
     
-    public Room(int roomNumber, String name, int numAdults, int numMinors) {
+    public Room(Integer roomNumber, String name, Integer numAdults, Integer numMinors) {
         this.roomNumber = roomNumber;
         this.name = name;
-        this.isBooked = true;
+        this.status = RESERVED.label;
         this.numAdults = numAdults;
         this.numMinors = numMinors;
         this.totalGuests = numAdults + numMinors;
@@ -33,11 +36,7 @@ public class Room {
         return id;
     }
     
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
-    public int getRoomNumber() {
+    public Integer getRoomNumber() {
         return roomNumber;
     }
     
@@ -53,41 +52,35 @@ public class Room {
         this.name = name;
     }
     
-    public boolean isBooked() {
-        return isBooked;
+    public String getStatus() {
+        return status;
     }
     
-    public void setBooked(boolean booked) {
-        isBooked = booked;
+    public void setStatus(EStatus eStatus) {
+        this.status = eStatus.label;
     }
     
-    public int getNumAdults() {
+    public Integer getNumAdults() {
         return numAdults;
     }
     
-    public void setNumAdults(int numAdults) {
+    public void setNumAdults(Integer numAdults) {
         this.numAdults = numAdults;
-//        calculateTotalGuests();
     }
     
-    public int getNumMinors() {
+    public Integer getNumMinors() {
         return numMinors;
     }
     
-    public void setNumMinors(int numMinors) {
+    public void setNumMinors(Integer numMinors) {
         this.numMinors = numMinors;
-//        calculateTotalGuests();
     }
     
     public void setActive(Boolean active) {
         this.active = active;
     }
     
-    /*private void calculateTotalGuests() {
-        this.totalGuests = this.numAdults + this.numMinors;
-    }*/
-    
-    public int getTotalGuests() {
+    public Integer getTotalGuests() {
         return this.numAdults + this.numMinors;
     }
     
@@ -97,7 +90,7 @@ public class Room {
                 "id=" + id +
                 ", roomNumber=" + roomNumber +
                 ", name='" + name + '\'' +
-                ", isBooked=" + isBooked +
+                ", isBooked=" + status +
                 ", numAdults=" + numAdults +
                 ", numMinors=" + numMinors +
                 ", totalGuests=" + this.getTotalGuests() +

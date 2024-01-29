@@ -2,11 +2,14 @@ package dev.fernando.proyecto.services;
 
 import dev.fernando.proyecto.interfaces.IRoomRepository;
 import dev.fernando.proyecto.interfaces.IRoomService;
+import dev.fernando.proyecto.models.EStatus;
 import dev.fernando.proyecto.models.Room;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -57,5 +60,14 @@ public class RoomService implements IRoomService {
     @Override
     public void deleteByIdActive(Long id) {
         roomRepository.deleteByIdActive(id);
+    }
+    
+    public void deleteActive(Room room) {
+        room.setActive(false);
+        roomRepository.save(room);
+    }
+    
+    public Optional<Room> findStatusByRoomNumber(int roomNumber) {
+        return roomRepository.findStatusByRoomNumber(roomNumber);
     }
 }

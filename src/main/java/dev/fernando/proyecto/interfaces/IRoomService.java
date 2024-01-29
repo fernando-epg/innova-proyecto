@@ -11,4 +11,8 @@ public interface IRoomService extends ICrudService<Room,Long> {
     Optional<Room> findByIdActive(Long id);
     
     void deleteByIdActive(Long id);
+    
+    Optional<Room> findStatusByRoomNumber(int roomNumber);
+    
+    void deleteActive(Room room);
 }
