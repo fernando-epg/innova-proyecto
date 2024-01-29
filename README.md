@@ -130,10 +130,9 @@ _Se presume que PostgreSQL ya está instalado_
 ## Consejos
 * Utilizar paquetes para mantener los archivos organizados.
 * Las interfaces pueden nombrarse con una i mayúscula antepuesta.
-* Se pueden tener métodos que realicen acciones de SQL personalizadas[^referencias]
+* Se pueden tener métodos que realicen acciones de SQL personalizadas [^referencias]
 
-  [^referencias]:
-     Referencias:
-     - [Spring JPA @Query example: Custom query in Spring Boot](https://www.bezkoder.com/spring-jpa-query/)
-     - [Hibernate - Query Language](https://www.tutorialspoint.com/hibernate/hibernate_query_language.htm)
-     - [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
+[^referencias]: Referencias: 
+  - [Spring JPA @Query example: Custom query in Spring Boot](https://www.bezkoder.com/spring-jpa-query/)
+  - [Hibernate - Query Language](https://www.tutorialspoint.com/hibernate/hibernate_query_language.htm)
+  - [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
