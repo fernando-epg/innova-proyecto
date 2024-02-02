@@ -3,6 +3,8 @@ package dev.fernando.proyecto.persistence.postgresql.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "student")
@@ -10,17 +12,23 @@ public class StudentPostgreSQL {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Column(nullable = false)
     private String firstName;
+    
+    @Column(nullable = false)
     private String lastName;
     private LocalDate dob;
-    private String gender;
+    
+    @Enumerated(EnumType.STRING)
+    private EGender gender;
     private String personalEmail;
     private String contactPhone;
     
     public StudentPostgreSQL() {
     }
     
-    public StudentPostgreSQL(String firstName, String lastName, LocalDate dob, String gender, String personalEmail, String contactPhone) {
+    public StudentPostgreSQL(String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
@@ -31,6 +39,10 @@ public class StudentPostgreSQL {
     
     public Long getId() {
         return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
     }
     
     public String getFirstName() {
@@ -57,11 +69,11 @@ public class StudentPostgreSQL {
         this.dob = dob;
     }
     
-    public String getGender() {
+    public EGender getGender() {
         return gender;
     }
     
-    public void setGender(String gender) {
+    public void setGender(EGender gender) {
         this.gender = gender;
     }
     
@@ -80,4 +92,6 @@ public class StudentPostgreSQL {
     public void setContactPhone(String contactPhone) {
         this.contactPhone = contactPhone;
     }
+    
+    
 }

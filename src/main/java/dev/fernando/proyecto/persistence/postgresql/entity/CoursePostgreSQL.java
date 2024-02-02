@@ -2,14 +2,20 @@ package dev.fernando.proyecto.persistence.postgresql.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+import java.util.Objects;
+
 @Entity
 @Table(name = "course")
 public class CoursePostgreSQL {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private String code;
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private Double credits;
     
     public CoursePostgreSQL() {
@@ -23,6 +29,10 @@ public class CoursePostgreSQL {
     
     public Long getId() {
         return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
     }
     
     public String getCode() {
@@ -48,4 +58,5 @@ public class CoursePostgreSQL {
     public void setCredits(Double credits) {
         this.credits = credits;
     }
+    
 }

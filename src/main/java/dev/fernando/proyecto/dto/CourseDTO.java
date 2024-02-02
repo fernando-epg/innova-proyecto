@@ -1,4 +1,4 @@
-package dev.fernando.proyecto.services.dto;
+package dev.fernando.proyecto.dto;
 
 import java.io.Serializable;
 

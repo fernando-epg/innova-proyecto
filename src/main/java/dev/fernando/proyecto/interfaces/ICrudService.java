@@ -1,4 +1,4 @@
-package dev.fernando.proyecto.services;
+package dev.fernando.proyecto.interfaces;
 
 import java.util.List;
 import java.util.Optional;

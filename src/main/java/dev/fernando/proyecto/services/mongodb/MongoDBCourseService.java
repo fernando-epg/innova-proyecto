@@ -2,8 +2,8 @@ package dev.fernando.proyecto.services.mongodb;
 
 import dev.fernando.proyecto.persistence.mongodb.document.CourseMongoDB;
 import dev.fernando.proyecto.persistence.mongodb.repository.IMongoDBCourseRepository;
-import dev.fernando.proyecto.services.ICourseGenericService;
-import dev.fernando.proyecto.services.dto.CourseDTO;
+import dev.fernando.proyecto.interfaces.ICourseGenericService;
+import dev.fernando.proyecto.dto.CourseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,5 +1,6 @@
 package dev.fernando.proyecto.persistence.mongodb.document;
 
+import dev.fernando.proyecto.persistence.postgresql.entity.EGender;
 import jakarta.persistence.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,14 +15,16 @@ public class StudentMongoDB {
     private String firstName;
     private String lastName;
     private LocalDate dob;
-    private String gender;
+    
+    @Enumerated(EnumType.STRING)
+    private EGender gender;
     private String personalEmail;
     private String contactPhone;
     
     public StudentMongoDB() {
     }
     
-    public StudentMongoDB(String firstName, String lastName, LocalDate dob, String gender, String personalEmail, String contactPhone) {
+    public StudentMongoDB(String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
@@ -58,11 +61,11 @@ public class StudentMongoDB {
         this.dob = dob;
     }
     
-    public String getGender() {
+    public EGender getGender() {
         return gender;
     }
     
-    public void setGender(String gender) {
+    public void setGender(EGender gender) {
         this.gender = gender;
     }
     

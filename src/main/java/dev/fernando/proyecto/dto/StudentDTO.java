@@ -1,4 +1,8 @@
-package dev.fernando.proyecto.services.dto;
+package dev.fernando.proyecto.dto;
+
+import dev.fernando.proyecto.persistence.postgresql.entity.EGender;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -8,12 +12,14 @@ public class StudentDTO implements Serializable {
     private String firstName;
     private String lastName;
     private LocalDate dob;
-    private String gender;
+    
+    @Enumerated(EnumType.STRING)
+    private EGender gender;
     private String personalEmail;
     private String contactPhone;
     
     
-    public StudentDTO(Object id, String firstName, String lastName, LocalDate dob, String gender, String personalEmail, String contactPhone) {
+    public StudentDTO(Object id, String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -23,7 +29,7 @@ public class StudentDTO implements Serializable {
         this.contactPhone = contactPhone;
     }
     
-    public StudentDTO(String firstName, String lastName, LocalDate dob, String gender, String personalEmail, String contactPhone) {
+    public StudentDTO(String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
@@ -51,7 +57,7 @@ public class StudentDTO implements Serializable {
         return dob;
     }
     
-    public String getGender() {
+    public EGender getGender() {
         return gender;
     }
     

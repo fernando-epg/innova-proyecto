@@ -2,9 +2,10 @@ package dev.fernando.proyecto.services.postgresql;
 
 import dev.fernando.proyecto.persistence.postgresql.repository.IPostgreSQLStudentRepository;
 import dev.fernando.proyecto.persistence.postgresql.entity.StudentPostgreSQL;
-import dev.fernando.proyecto.services.IStudentGenericService;
-import dev.fernando.proyecto.services.dto.StudentDTO;
+import dev.fernando.proyecto.interfaces.IStudentGenericService;
+import dev.fernando.proyecto.dto.StudentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;

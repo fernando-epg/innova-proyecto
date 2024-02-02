@@ -2,14 +2,15 @@ package dev.fernando.proyecto.services.postgresql;
 
 import dev.fernando.proyecto.persistence.postgresql.entity.CoursePostgreSQL;
 import dev.fernando.proyecto.persistence.postgresql.repository.IPostgreSQLCourseRepository;
-import dev.fernando.proyecto.services.ICourseGenericService;
-import dev.fernando.proyecto.services.dto.CourseDTO;
+import dev.fernando.proyecto.interfaces.ICourseGenericService;
+import dev.fernando.proyecto.dto.CourseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-// @Service
+//@Service
 public class JpaCourseService implements ICourseGenericService<CourseDTO,Long> {
     final private IPostgreSQLCourseRepository userRepository;
     
