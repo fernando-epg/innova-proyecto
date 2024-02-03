@@ -1,6 +1,6 @@
 package dev.fernando.proyecto.dto;
 
-import dev.fernando.proyecto.persistence.postgresql.entity.EGender;
+import dev.fernando.proyecto.persistence.EGender;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 

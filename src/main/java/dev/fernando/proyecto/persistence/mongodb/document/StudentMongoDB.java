@@ -1,6 +1,6 @@
 package dev.fernando.proyecto.persistence.mongodb.document;
 
-import dev.fernando.proyecto.persistence.postgresql.entity.EGender;
+import dev.fernando.proyecto.persistence.EGender;
 import jakarta.persistence.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 

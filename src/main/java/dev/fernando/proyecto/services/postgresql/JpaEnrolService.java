@@ -2,7 +2,6 @@ package dev.fernando.proyecto.services.postgresql;
 
 import dev.fernando.proyecto.dto.EnrolDTO;
 import dev.fernando.proyecto.interfaces.IEnrolGenericService;
-import dev.fernando.proyecto.persistence.postgresql.entity.EnrolId;
 import dev.fernando.proyecto.persistence.postgresql.entity.EnrolPostgreSQL;
 import dev.fernando.proyecto.persistence.postgresql.repository.IPostgreSQLEnrolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-//@Service
+@Service
 public class JpaEnrolService implements IEnrolGenericService<EnrolDTO,Long> {
     
     private final IPostgreSQLEnrolRepository enrolRepository;
@@ -50,14 +49,15 @@ public class JpaEnrolService implements IEnrolGenericService<EnrolDTO,Long> {
     
     private EnrolPostgreSQL dtoConverter(EnrolDTO dto) {
         return new EnrolPostgreSQL(
-                new EnrolId(Long.valueOf(dto.getStudentId()), Long.valueOf(dto.getCourseId()))
+                Long.valueOf(dto.getStudentId()),
+                Long.valueOf(dto.getCourseId())
         );
     }
     
     private EnrolDTO entityConverter(EnrolPostgreSQL entity) {
         return new EnrolDTO(
-                String.valueOf(entity.getId().getCourseId()),
-                String.valueOf(entity.getId().getStudentId()),
+                String.valueOf(entity.getCourseId()),
+                String.valueOf(entity.getStudentId()),
                 entity.getActive(),
                 entity.getSuccessfulCourse()
         );

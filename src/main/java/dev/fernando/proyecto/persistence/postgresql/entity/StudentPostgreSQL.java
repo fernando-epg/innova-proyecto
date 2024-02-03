@@ -1,10 +1,9 @@
 package dev.fernando.proyecto.persistence.postgresql.entity;
 
+import dev.fernando.proyecto.persistence.EGender;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "student")

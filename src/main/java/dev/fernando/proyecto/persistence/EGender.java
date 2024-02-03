@@ -1,4 +1,4 @@
-package dev.fernando.proyecto.persistence.postgresql.entity;
+package dev.fernando.proyecto.persistence;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

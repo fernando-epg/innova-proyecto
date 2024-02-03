@@ -1,28 +1,34 @@
 package dev.fernando.proyecto.persistence.postgresql.entity;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "enroll")
 public class EnrolPostgreSQL {
     
-    @EmbeddedId
-    private EnrolId id;
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "student_id")
+    private Long studentId;
+    
+    @Column(name = "course_id")
+    private Long courseId;
     private Boolean active = true;
     private Boolean successfulCourse = false;
     
     public EnrolPostgreSQL() {
     }
     
-    public EnrolPostgreSQL(EnrolId enrolId) {
-        this.id = enrolId;
+    public EnrolPostgreSQL(Long courseId, Long studentId) {
+        this.courseId = courseId;
+        this.studentId = studentId;
     }
     
-    public EnrolPostgreSQL(EnrolId id, Boolean active, Boolean successfulCourse) {
-        this.id = id;
+    public EnrolPostgreSQL(Long courseId, Long studentId, Boolean active, Boolean successfulCourse) {
+        this.courseId = courseId;
+        this.studentId = studentId;
         this.active = active;
         this.successfulCourse = successfulCourse;
     }
@@ -43,7 +49,11 @@ public class EnrolPostgreSQL {
         this.successfulCourse = successfulCourse;
     }
     
-    public EnrolId getId() {
-        return id;
+    public Long getStudentId() {
+        return studentId;
+    }
+    
+    public Long getCourseId() {
+        return courseId;
     }
 }
