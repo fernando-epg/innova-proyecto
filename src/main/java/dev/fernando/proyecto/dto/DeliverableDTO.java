@@ -52,4 +52,28 @@ public class DeliverableDTO {
     public Double getPonderation() {
         return ponderation;
     }
+    
+    public void setId(Object id) {
+        this.id = id;
+    }
+    
+    public void setCourseId(Object courseId) {
+        this.courseId = courseId;
+    }
+    
+    public void setStudentId(Object studentId) {
+        this.studentId = studentId;
+    }
+    
+    public void setGrade(Double grade) {
+        this.grade = grade;
+    }
+    
+    public void setGradeName(String gradeName) {
+        this.gradeName = gradeName;
+    }
+    
+    public void setPonderation(Double ponderation) {
+        this.ponderation = ponderation;
+    }
 }

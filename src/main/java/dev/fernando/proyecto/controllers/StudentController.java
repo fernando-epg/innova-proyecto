@@ -24,12 +24,12 @@ public class StudentController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Object id) {
         var parsedId = id;
-        if(service.getClass() == JpaStudentService.class) {
+        if (service.getClass() == JpaStudentService.class) {
             parsedId = Long.valueOf(id.toString());
         }
         Optional<StudentDTO> student = service.findById(parsedId);
-        if(student.isPresent()) {
-        return ResponseEntity.ok(student);
+        if (student.isPresent()) {
+            return ResponseEntity.ok(student);
         } else {
             return ResponseEntity.badRequest().body("Bad request.");
         }
@@ -38,7 +38,7 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<?> listAll() {
         Optional<List<StudentDTO>> students = Optional.ofNullable(service.findAll());
-        if(students.isPresent()) {
+        if (students.isPresent()) {
             return ResponseEntity.ok(students);
         } else {
             return ResponseEntity.notFound().build();
@@ -46,13 +46,13 @@ public class StudentController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable Object id){
+    public ResponseEntity<?> deleteById(@PathVariable Object id) {
         var parsedId = id;
-        if(service.getClass() == JpaStudentService.class) {
+        if (service.getClass() == JpaStudentService.class) {
             parsedId = Long.valueOf(id.toString());
         }
         Optional<StudentDTO> student = service.findById(parsedId);
-        if(student.isPresent()) {
+        if (student.isPresent()) {
             service.deleteById(parsedId);
             return ResponseEntity.ok("Success");
         } else {
@@ -62,15 +62,15 @@ public class StudentController {
     
     @DeleteMapping
     public ResponseEntity<?> delete(@RequestBody(required = false) StudentDTO dto) {
-        if(dto == null) {
+        if (dto == null) {
             return ResponseEntity.badRequest().body("Bad request");
         }
         var parsedId = dto.getId();
-        if(service.getClass() == JpaStudentService.class) {
+        if (service.getClass() == JpaStudentService.class) {
             parsedId = Long.valueOf(dto.getId().toString());
         }
         Optional<StudentDTO> student = service.findById(parsedId);
-        if(student.isPresent()) {
+        if (student.isPresent()) {
             service.delete(student.get());
             return ResponseEntity.ok("Success");
         } else {
@@ -80,12 +80,12 @@ public class StudentController {
     
     @PostMapping
     public ResponseEntity<?> add(@RequestBody(required = false) StudentDTO dto) {
-        if(dto == null) {
+        if (dto == null) {
             return ResponseEntity.badRequest().body("Bad request");
         }
         
         Optional<StudentDTO> newStudent = Optional.ofNullable((StudentDTO) service.save(dto));
-        if(newStudent.isPresent()) {
+        if (newStudent.isPresent()) {
             return ResponseEntity.ok(newStudent);
         } else {
             return ResponseEntity.badRequest().body("Bad request");
@@ -94,32 +94,32 @@ public class StudentController {
     
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@RequestBody(required = false) StudentDTO dto, @PathVariable Object id) {
-        if(dto == null) {
+        if (dto == null) {
             return ResponseEntity.badRequest().body("Bad request");
         }
         
         var parsedId = dto.getId();
-        if(service.getClass() == JpaStudentService.class) {
+        if (service.getClass() == JpaStudentService.class) {
             parsedId = Long.valueOf(id.toString());
         }
         Optional<StudentDTO> student = service.findById(parsedId);
-        if(student.isPresent()) {
-            if(dto.getFirstName() != null) {
+        if (student.isPresent()) {
+            if (dto.getFirstName() != null) {
                 student.get().setFirstName(dto.getFirstName());
             }
-            if(dto.getLastName() != null) {
+            if (dto.getLastName() != null) {
                 student.get().setLastName(dto.getLastName());
             }
-            if(dto.getDob() != null) {
+            if (dto.getDob() != null) {
                 student.get().setDob(dto.getDob());
             }
-            if(dto.getGender() != null) {
+            if (dto.getGender() != null) {
                 student.get().setGender(dto.getGender());
             }
-            if(dto.getPersonalEmail() != null){
+            if (dto.getPersonalEmail() != null) {
                 student.get().setPersonalEmail(dto.getPersonalEmail());
             }
-            if(dto.getContactPhone() != null) {
+            if (dto.getContactPhone() != null) {
                 student.get().setContactPhone(dto.getContactPhone());
             }
             
