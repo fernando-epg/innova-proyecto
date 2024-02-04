@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Document
 @Table(name="student")
@@ -24,20 +25,20 @@ public class StudentMongoDB {
     public StudentMongoDB() {
     }
     
-    public StudentMongoDB(String id, String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
+    public StudentMongoDB(String id, String firstName, String lastName, String dob, EGender gender, String personalEmail, String contactPhone) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.dob = dob;
+        this.dob = LocalDate.parse(dob, DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         this.gender = gender;
         this.personalEmail = personalEmail;
         this.contactPhone = contactPhone;
     }
     
-    public StudentMongoDB(String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
+    public StudentMongoDB(String firstName, String lastName, String dob, EGender gender, String personalEmail, String contactPhone) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.dob = dob;
+        this.dob = LocalDate.parse(dob,DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         this.gender = gender;
         this.personalEmail = personalEmail;
         this.contactPhone = contactPhone;

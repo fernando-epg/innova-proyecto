@@ -7,6 +7,7 @@ import dev.fernando.proyecto.dto.StudentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,7 @@ public class JpaStudentService implements IStudentGenericService<StudentDTO,Long
                     Long.valueOf(dto.getId().toString()),
                     dto.getFirstName(),
                     dto.getLastName(),
-                    dto.getDob(),
+                    dto.getDob().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
                     dto.getGender(),
                     dto.getPersonalEmail(),
                     dto.getContactPhone()
@@ -73,7 +74,7 @@ public class JpaStudentService implements IStudentGenericService<StudentDTO,Long
         return new StudentPostgreSQL(
                 dto.getFirstName(),
                 dto.getLastName(),
-                dto.getDob(),
+                dto.getDob().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
                 dto.getGender(),
                 dto.getPersonalEmail(),
                 dto.getContactPhone()
@@ -85,7 +86,7 @@ public class JpaStudentService implements IStudentGenericService<StudentDTO,Long
                 entity.getId(),
                 entity.getFirstName(),
                 entity.getLastName(),
-                entity.getDob(),
+                entity.getDob().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 entity.getGender(),
                 entity.getPersonalEmail(),
                 entity.getContactPhone()

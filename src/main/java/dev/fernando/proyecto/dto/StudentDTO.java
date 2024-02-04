@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class StudentDTO implements Serializable {
     private Object id;
@@ -19,20 +20,20 @@ public class StudentDTO implements Serializable {
     private String contactPhone;
     
     
-    public StudentDTO(Object id, String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
+    public StudentDTO(Object id, String firstName, String lastName, String dob, EGender gender, String personalEmail, String contactPhone) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.dob = dob;
+        this.dob = LocalDate.parse(dob, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         this.gender = gender;
         this.personalEmail = personalEmail;
         this.contactPhone = contactPhone;
     }
     
-    public StudentDTO(String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
+    public StudentDTO(String firstName, String lastName, String dob, EGender gender, String personalEmail, String contactPhone) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.dob = dob;
+        this.dob = LocalDate.parse(dob,DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         this.gender = gender;
         this.personalEmail = personalEmail;
         this.contactPhone = contactPhone;

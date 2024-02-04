@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+//@Service
 public class JpaCourseService implements ICourseGenericService<CourseDTO,Long> {
     final private IPostgreSQLCourseRepository repository;
     

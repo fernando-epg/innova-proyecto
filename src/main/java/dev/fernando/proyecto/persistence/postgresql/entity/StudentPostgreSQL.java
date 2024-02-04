@@ -4,6 +4,7 @@ import dev.fernando.proyecto.persistence.EGender;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "student")
@@ -27,20 +28,20 @@ public class StudentPostgreSQL {
     public StudentPostgreSQL() {
     }
     
-    public StudentPostgreSQL(String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
+    public StudentPostgreSQL(String firstName, String lastName, String dob, EGender gender, String personalEmail, String contactPhone) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.dob = dob;
+        this.dob = LocalDate.parse(dob, DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         this.gender = gender;
         this.personalEmail = personalEmail;
         this.contactPhone = contactPhone;
     }
     
-    public StudentPostgreSQL(Long id, String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
+    public StudentPostgreSQL(Long id, String firstName, String lastName, String dob, EGender gender, String personalEmail, String contactPhone) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.dob = dob;
+        this.dob = LocalDate.parse(dob,DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         this.gender = gender;
         this.personalEmail = personalEmail;
         this.contactPhone = contactPhone;

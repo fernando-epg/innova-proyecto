@@ -5,12 +5,13 @@ import dev.fernando.proyecto.interfaces.IDeliverableGenericService;
 import dev.fernando.proyecto.persistence.mongodb.document.DeliverableMongoDB;
 import dev.fernando.proyecto.persistence.mongodb.repository.IMongoDBDeliverableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-//@Service
+@Service
 public class MongoDBDeliverableService implements IDeliverableGenericService<DeliverableDTO,String> {
     
     private final IMongoDBDeliverableRepository repository;

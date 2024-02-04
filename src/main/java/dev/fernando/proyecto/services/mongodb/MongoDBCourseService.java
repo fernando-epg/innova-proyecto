@@ -5,12 +5,13 @@ import dev.fernando.proyecto.persistence.mongodb.repository.IMongoDBCourseReposi
 import dev.fernando.proyecto.interfaces.ICourseGenericService;
 import dev.fernando.proyecto.dto.CourseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-//@Service
+@Service
 public class MongoDBCourseService implements ICourseGenericService<CourseDTO, String> {
     final private IMongoDBCourseRepository repository;
     

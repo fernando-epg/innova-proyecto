@@ -31,7 +31,7 @@ public class StudentController {
         if (student.isPresent()) {
             return ResponseEntity.ok(student);
         } else {
-            return ResponseEntity.badRequest().body("Bad request.");
+            return ResponseEntity.notFound().build();
         }
     }
     
@@ -83,7 +83,7 @@ public class StudentController {
         if (dto == null) {
             return ResponseEntity.badRequest().body("Bad request");
         }
-        
+        System.out.println(dto.getDob());
         Optional<StudentDTO> newStudent = Optional.ofNullable((StudentDTO) service.save(dto));
         if (newStudent.isPresent()) {
             return ResponseEntity.ok(newStudent);
