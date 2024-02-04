@@ -36,6 +36,16 @@ public class StudentPostgreSQL {
         this.contactPhone = contactPhone;
     }
     
+    public StudentPostgreSQL(Long id, String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dob = dob;
+        this.gender = gender;
+        this.personalEmail = personalEmail;
+        this.contactPhone = contactPhone;
+    }
+    
     public Long getId() {
         return id;
     }

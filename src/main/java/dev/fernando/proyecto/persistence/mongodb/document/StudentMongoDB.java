@@ -24,6 +24,16 @@ public class StudentMongoDB {
     public StudentMongoDB() {
     }
     
+    public StudentMongoDB(String id, String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dob = dob;
+        this.gender = gender;
+        this.personalEmail = personalEmail;
+        this.contactPhone = contactPhone;
+    }
+    
     public StudentMongoDB(String firstName, String lastName, LocalDate dob, EGender gender, String personalEmail, String contactPhone) {
         this.firstName = firstName;
         this.lastName = lastName;

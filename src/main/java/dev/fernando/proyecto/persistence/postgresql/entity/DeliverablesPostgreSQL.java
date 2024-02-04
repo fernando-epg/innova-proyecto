@@ -26,6 +26,15 @@ public class DeliverablesPostgreSQL {
         this.ponderation = ponderation;
     }
     
+    public DeliverablesPostgreSQL(Long id, Long courseId, Long studentId, Double grade, String gradeName, Double ponderation) {
+        this.id = id;
+        this.courseId = courseId;
+        this.studentId = studentId;
+        this.grade = grade;
+        this.gradeName = gradeName;
+        this.ponderation = ponderation;
+    }
+    
     public Long getId() {
         return id;
     }

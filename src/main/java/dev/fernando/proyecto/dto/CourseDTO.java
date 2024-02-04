@@ -39,4 +39,20 @@ public class CourseDTO implements Serializable {
     public String getCode() {
         return code;
     }
+    
+    public void setId(Object id) {
+        this.id = id;
+    }
+    
+    public void setCode(String code) {
+        this.code = code;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setCredits(Double credits) {
+        this.credits = credits;
+    }
 }

@@ -68,4 +68,32 @@ public class StudentDTO implements Serializable {
     public String getContactPhone() {
         return contactPhone;
     }
+    
+    public void setId(Object id) {
+        this.id = id;
+    }
+    
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+    
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+    
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
+    
+    public void setGender(EGender gender) {
+        this.gender = gender;
+    }
+    
+    public void setPersonalEmail(String personalEmail) {
+        this.personalEmail = personalEmail;
+    }
+    
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
 }

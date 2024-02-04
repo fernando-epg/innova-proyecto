@@ -13,8 +13,8 @@ public class DeliverableMongoDB {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     
-    private Long courseId;
-    private Long studentId;
+    private String courseId;
+    private String studentId;
     private Double grade;
     private String gradeName;
     private Double ponderation;
@@ -22,7 +22,7 @@ public class DeliverableMongoDB {
     public DeliverableMongoDB() {
     }
     
-    public DeliverableMongoDB(Long courseId, Long studentId, Double grade, String gradeName, Double ponderation) {
+    public DeliverableMongoDB(String courseId, String studentId, Double grade, String gradeName, Double ponderation) {
         this.courseId = courseId;
         this.studentId = studentId;
         this.grade = grade;
@@ -30,7 +30,7 @@ public class DeliverableMongoDB {
         this.ponderation = ponderation;
     }
     
-    public DeliverableMongoDB(String id, Long courseId, Long studentId, Double grade, String gradeName, Double ponderation) {
+    public DeliverableMongoDB(String id, String courseId, String studentId, Double grade, String gradeName, Double ponderation) {
         this.id = id;
         this.courseId = courseId;
         this.studentId = studentId;
@@ -43,19 +43,23 @@ public class DeliverableMongoDB {
         return id;
     }
     
-    public Long getCourseId() {
+    public void setId(String id) {
+        this.id = id;
+    }
+    
+    public String getCourseId() {
         return courseId;
     }
     
-    public void setCourseId(Long courseId) {
+    public void setCourseId(String courseId) {
         this.courseId = courseId;
     }
     
-    public Long getStudentId() {
+    public String getStudentId() {
         return studentId;
     }
     
-    public void setStudentId(Long studentId) {
+    public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
     

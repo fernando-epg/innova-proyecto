@@ -27,6 +27,13 @@ public class CoursePostgreSQL {
         this.credits = credits;
     }
     
+    public CoursePostgreSQL(Long id, String code, String name, Double credits) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.credits = credits;
+    }
+    
     public Long getId() {
         return id;
     }

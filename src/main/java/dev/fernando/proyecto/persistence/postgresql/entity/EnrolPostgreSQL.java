@@ -15,8 +15,8 @@ public class EnrolPostgreSQL {
     
     @Column(name = "course_id")
     private Long courseId;
-    private Boolean active = true;
-    private Boolean successfulCourse = false;
+    private Boolean active;
+    private Boolean successfulCourse;
     
     public EnrolPostgreSQL() {
     }
@@ -24,9 +24,19 @@ public class EnrolPostgreSQL {
     public EnrolPostgreSQL(Long courseId, Long studentId) {
         this.courseId = courseId;
         this.studentId = studentId;
+        this.active = true;
+        this.successfulCourse = false;
     }
     
     public EnrolPostgreSQL(Long courseId, Long studentId, Boolean active, Boolean successfulCourse) {
+        this.courseId = courseId;
+        this.studentId = studentId;
+        this.active = active;
+        this.successfulCourse = successfulCourse;
+    }
+    
+    public EnrolPostgreSQL(Long id, Long courseId, Long studentId, Boolean active, Boolean successfulCourse) {
+        this.id = id;
         this.courseId = courseId;
         this.studentId = studentId;
         this.active = active;
@@ -55,5 +65,17 @@ public class EnrolPostgreSQL {
     
     public Long getCourseId() {
         return courseId;
+    }
+    
+    public Long getId() {
+        return id;
+    }
+    
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
+    }
+    
+    public void setCourseId(Long courseId) {
+        this.courseId = courseId;
     }
 }

@@ -25,6 +25,13 @@ public class CourseMongoDB {
         this.credits = credits;
     }
     
+    public CourseMongoDB(String id, String code, String name, Double credits) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.credits = credits;
+    }
+    
     public String getId() {
         return id;
     }

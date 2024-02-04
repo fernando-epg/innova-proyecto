@@ -4,22 +4,22 @@ import java.io.Serializable;
 
 public class EnrolDTO implements Serializable {
     private Object id;
-    private String courseId;
-    private String studentId;
+    private Object courseId;
+    private Object studentId;
     private Boolean active;
     private Boolean successfulCourse;
     
     public EnrolDTO() {
     }
     
-    public EnrolDTO(String courseId, String studentId, Boolean active, Boolean successfulCourse) {
+    public EnrolDTO(Object courseId, Object studentId) {
         this.courseId = courseId;
         this.studentId = studentId;
-        this.active = active;
-        this.successfulCourse = successfulCourse;
+        this.active = true;
+        this.successfulCourse = false;
     }
     
-    public EnrolDTO(Object id, String courseId, String studentId, Boolean active, Boolean successfulCourse) {
+    public EnrolDTO(Object id, Object courseId, Object studentId, Boolean active, Boolean successfulCourse) {
         this.id = id;
         this.courseId = courseId;
         this.studentId = studentId;
@@ -27,9 +27,11 @@ public class EnrolDTO implements Serializable {
         this.successfulCourse = successfulCourse;
     }
     
-    public EnrolDTO(String courseId, String studentId) {
+    public EnrolDTO(Object courseId, Object studentId, Boolean active, Boolean successfulCourse) {
         this.courseId = courseId;
         this.studentId = studentId;
+        this.active = active;
+        this.successfulCourse = successfulCourse;
     }
     
     public Boolean getActive() {
@@ -40,11 +42,31 @@ public class EnrolDTO implements Serializable {
         return successfulCourse;
     }
     
-    public String getCourseId() {
+    public Object getCourseId() {
         return courseId;
     }
     
-    public String getStudentId() {
+    public Object getStudentId() {
         return studentId;
+    }
+    
+    public Object getId() {
+        return id;
+    }
+    
+    public void setCourseId(Object courseId) {
+        this.courseId = courseId;
+    }
+    
+    public void setStudentId(Object studentId) {
+        this.studentId = studentId;
+    }
+    
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+    
+    public void setSuccessfulCourse(Boolean successfulCourse) {
+        this.successfulCourse = successfulCourse;
     }
 }

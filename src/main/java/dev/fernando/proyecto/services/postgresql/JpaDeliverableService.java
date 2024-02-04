@@ -7,24 +7,76 @@ import dev.fernando.proyecto.persistence.postgresql.repository.IPostgreSQLDelive
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-//@Service
+@Service
 public class JpaDeliverableService implements IDeliverableGenericService<DeliverableDTO,Long> {
     
-    private final IPostgreSQLDeliverableRepository deliverableRepository;
+    private final IPostgreSQLDeliverableRepository repository;
     
     @Autowired
-    public JpaDeliverableService(IPostgreSQLDeliverableRepository deliverableRepository) {
-        this.deliverableRepository = deliverableRepository;
+    public JpaDeliverableService(IPostgreSQLDeliverableRepository repository) {
+        this.repository = repository;
     }
     
     @Override
     public DeliverableDTO save(DeliverableDTO dto) {
         DeliverablesPostgreSQL newDeliverable = dtoConverter(dto);
-        DeliverablesPostgreSQL result = deliverableRepository.save(newDeliverable);
+        DeliverablesPostgreSQL result = repository.save(newDeliverable);
         return entityConverter(result);
+    }
+    
+    @Override
+    public Optional<DeliverableDTO> findById(Long id) {
+        Optional<DeliverablesPostgreSQL> deliverable = repository.findById(id);
+        if(deliverable.isPresent()) {
+            return Optional.of(entityConverter(deliverable.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+    
+    @Override
+    public List<DeliverableDTO> findAll() {
+        List<DeliverablesPostgreSQL> result = repository.findAll();
+        List<DeliverableDTO> resultDto = new ArrayList<>();
+        for (DeliverablesPostgreSQL deliverable : result) {
+            DeliverableDTO dtoEntry = entityConverter(deliverable);
+            resultDto.add(dtoEntry);
+        }
+        return resultDto;
+    }
+    
+    @Override
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
+    
+    @Override
+    public void delete(DeliverableDTO dto) {
+        repository.delete(dtoConverter(dto));
+    }
+    
+    private DeliverablesPostgreSQL dtoConverter(DeliverableDTO dto) {
+        if(dto.getId() != null) {
+            return new DeliverablesPostgreSQL(
+                    Long.valueOf(dto.getId().toString()),
+                    Long.valueOf(dto.getCourseId().toString()),
+                    Long.valueOf(dto.getStudentId().toString()),
+                    dto.getGrade(),
+                    dto.getGradeName(),
+                    dto.getPonderation()
+            );
+        }
+        return new DeliverablesPostgreSQL(
+                Long.valueOf(dto.getCourseId().toString()),
+                Long.valueOf(dto.getStudentId().toString()),
+                dto.getGrade(),
+                dto.getGradeName(),
+                dto.getPonderation()
+        );
     }
     
     private DeliverableDTO entityConverter(DeliverablesPostgreSQL result) {
@@ -38,33 +90,5 @@ public class JpaDeliverableService implements IDeliverableGenericService<Deliver
         );
     }
     
-    private DeliverablesPostgreSQL dtoConverter(DeliverableDTO dto) {
-        return new DeliverablesPostgreSQL(
-                (Long) dto.getCourseId(),
-                (Long) dto.getStudentId(),
-                dto.getGrade(),
-                dto.getGradeName(),
-                dto.getPonderation()
-        );
-    }
     
-    @Override
-    public Optional<DeliverableDTO> findById(Long id) {
-        return Optional.empty();
-    }
-    
-    @Override
-    public List<DeliverableDTO> findAll() {
-        return null;
-    }
-    
-    @Override
-    public void deleteById(Long id) {
-    
-    }
-    
-    @Override
-    public void delete(DeliverableDTO entity) {
-    
-    }
 }

@@ -1,12 +1,15 @@
 package dev.fernando.proyecto.persistence.mongodb.document;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 @Table(name = "enrol")
 public class EnrolMongoDB {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private String id;
     
     private String courseId;
     private String studentId;
@@ -21,12 +24,15 @@ public class EnrolMongoDB {
         this.studentId = studentId;
     }
     
-    public EnrolMongoDB(Boolean active, Boolean successfulCourse) {
+    public EnrolMongoDB(String courseId, String studentId, Boolean active, Boolean successfulCourse) {
+        this.courseId = courseId;
+        this.studentId = studentId;
         this.active = active;
         this.successfulCourse = successfulCourse;
     }
     
-    public EnrolMongoDB(String courseId, String studentId, Boolean active, Boolean successfulCourse) {
+    public EnrolMongoDB(String id, String courseId, String studentId, Boolean active, Boolean successfulCourse) {
+        this.id = id;
         this.courseId = courseId;
         this.studentId = studentId;
         this.active = active;
@@ -63,5 +69,9 @@ public class EnrolMongoDB {
     
     public void setSuccessfulCourse(Boolean successfulCourse) {
         this.successfulCourse = successfulCourse;
+    }
+    
+    public String getId() {
+        return id;
     }
 }

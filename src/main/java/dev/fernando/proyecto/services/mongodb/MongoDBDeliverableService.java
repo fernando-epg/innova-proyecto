@@ -5,26 +5,78 @@ import dev.fernando.proyecto.interfaces.IDeliverableGenericService;
 import dev.fernando.proyecto.persistence.mongodb.document.DeliverableMongoDB;
 import dev.fernando.proyecto.persistence.mongodb.repository.IMongoDBDeliverableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+//@Service
 public class MongoDBDeliverableService implements IDeliverableGenericService<DeliverableDTO,String> {
     
-    private final IMongoDBDeliverableRepository deliverableRepository;
+    private final IMongoDBDeliverableRepository repository;
     
     @Autowired
-    public MongoDBDeliverableService(IMongoDBDeliverableRepository deliverableRepository) {
-        this.deliverableRepository = deliverableRepository;
+    public MongoDBDeliverableService(IMongoDBDeliverableRepository repository) {
+        this.repository = repository;
     }
     
     @Override
     public DeliverableDTO save(DeliverableDTO dto) {
         DeliverableMongoDB newDeliverable = dtoConverter(dto);
-        DeliverableMongoDB result = deliverableRepository.save(newDeliverable);
+        DeliverableMongoDB result = repository.save(newDeliverable);
         return entityConverter(result);
+    }
+    
+    @Override
+    public Optional<DeliverableDTO> findById(String id) {
+        Optional<DeliverableMongoDB> deliverable = repository.findById(id);
+        if(deliverable.isPresent()) {
+            return Optional.of(entityConverter(deliverable.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+    
+    @Override
+    public List<DeliverableDTO> findAll() {
+        List<DeliverableMongoDB> result = repository.findAll();
+        List<DeliverableDTO> resultDto = new ArrayList<>();
+        for (DeliverableMongoDB course : result) {
+            DeliverableDTO dtoEntry = entityConverter(course);
+            resultDto.add(dtoEntry);
+        }
+        return resultDto;
+    }
+    
+    @Override
+    public void deleteById(String id) {
+        repository.deleteById(id);
+    }
+    
+    @Override
+    public void delete(DeliverableDTO dto) {
+        repository.delete(dtoConverter(dto));
+    }
+    
+    private DeliverableMongoDB dtoConverter(DeliverableDTO dto) {
+        if(dto.getId() != null) {
+            return new DeliverableMongoDB(
+                    String.valueOf(dto.getId()),
+                    String.valueOf(dto.getCourseId()),
+                    String.valueOf(dto.getStudentId()),
+                    dto.getGrade(),
+                    dto.getGradeName(),
+                    dto.getPonderation()
+            );
+        }
+        
+        return new DeliverableMongoDB(
+                String.valueOf(dto.getCourseId()),
+                String.valueOf(dto.getStudentId()),
+                dto.getGrade(),
+                dto.getGradeName(),
+                dto.getPonderation()
+        );
     }
     
     private DeliverableDTO entityConverter(DeliverableMongoDB result) {
@@ -36,35 +88,5 @@ public class MongoDBDeliverableService implements IDeliverableGenericService<Del
                 result.getGradeName(),
                 result.getPonderation()
         );
-    }
-    
-    private DeliverableMongoDB dtoConverter(DeliverableDTO dto) {
-        return new DeliverableMongoDB(
-                (Long) dto.getCourseId(),
-                (Long) dto.getStudentId(),
-                dto.getGrade(),
-                dto.getGradeName(),
-                dto.getPonderation()
-        );
-    }
-    
-    @Override
-    public Optional<DeliverableDTO> findById(String id) {
-        return Optional.empty();
-    }
-    
-    @Override
-    public List<DeliverableDTO> findAll() {
-        return null;
-    }
-    
-    @Override
-    public void deleteById(String id) {
-    
-    }
-    
-    @Override
-    public void delete(DeliverableDTO dto) {
-    
     }
 }
