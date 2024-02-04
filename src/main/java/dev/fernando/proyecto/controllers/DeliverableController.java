@@ -98,7 +98,7 @@ public class DeliverableController {
             return ResponseEntity.badRequest().body("Bad request");
         }
         
-        var parseId = dto.getId();
+        var parseId = id;
         if(service.getClass() == JpaDeliverableService.class) {
             parseId = Long.valueOf(id.toString());
         }

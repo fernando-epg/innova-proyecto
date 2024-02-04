@@ -83,7 +83,6 @@ public class StudentController {
         if (dto == null) {
             return ResponseEntity.badRequest().body("Bad request");
         }
-        System.out.println(dto.getDob());
         Optional<StudentDTO> newStudent = Optional.ofNullable((StudentDTO) service.save(dto));
         if (newStudent.isPresent()) {
             return ResponseEntity.ok(newStudent);
@@ -98,7 +97,7 @@ public class StudentController {
             return ResponseEntity.badRequest().body("Bad request");
         }
         
-        var parsedId = dto.getId();
+        var parsedId = id;
         if (service.getClass() == JpaStudentService.class) {
             parsedId = Long.valueOf(id.toString());
         }

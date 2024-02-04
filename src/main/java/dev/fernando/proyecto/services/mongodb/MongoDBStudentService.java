@@ -12,25 +12,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-//@Service
+@Service
 public class MongoDBStudentService implements IStudentGenericService<StudentDTO,String> {
     
-    final private IMongoDBStudentRepository studentRepository;
+    final private IMongoDBStudentRepository repository;
     
     @Autowired
-    public MongoDBStudentService(IMongoDBStudentRepository studentRepository) {
-        this.studentRepository = studentRepository;
+    public MongoDBStudentService(IMongoDBStudentRepository repository) {
+        this.repository = repository;
     }
     @Override
     public StudentDTO save(StudentDTO entity) {
         StudentMongoDB newStudent = dtoConverter(entity);
-        StudentMongoDB result = studentRepository.save(newStudent);
+        StudentMongoDB result = repository.save(newStudent);
         return entityConverter(result);
     }
     
     @Override
     public Optional<StudentDTO> findById(String id) {
-        Optional<StudentMongoDB> student = studentRepository.findById(id);
+        Optional<StudentMongoDB> student = repository.findById(id);
         if(student.isPresent()) {
             return Optional.of(entityConverter(student.get()));
         }
@@ -39,7 +39,7 @@ public class MongoDBStudentService implements IStudentGenericService<StudentDTO,
     
     @Override
     public List<StudentDTO> findAll() {
-        List<StudentMongoDB> result = studentRepository.findAll();
+        List<StudentMongoDB> result = repository.findAll();
         List<StudentDTO> resultDto = new ArrayList<>();
         for (StudentMongoDB student : result) {
             StudentDTO dtoEntry = entityConverter(student);
@@ -50,12 +50,12 @@ public class MongoDBStudentService implements IStudentGenericService<StudentDTO,
     
     @Override
     public void deleteById(String id) {
-        studentRepository.deleteById(id);
+        repository.deleteById(id);
     }
     
     @Override
     public void delete(StudentDTO entity) {
-        studentRepository.delete(dtoConverter(entity));
+        repository.delete(dtoConverter(entity));
     }
     
     private StudentMongoDB dtoConverter(StudentDTO dto) {
