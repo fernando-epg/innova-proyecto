@@ -140,7 +140,7 @@ y se debe implementar los métodos necesarios.
   [Spring JPA @Query example: Custom query in Spring Boot](https://www.bezkoder.com/spring-jpa-query/) / 
   [Hibernate - Query Language](https://www.tutorialspoint.com/hibernate/hibernate_query_language.htm) / 
   [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
-
+****
 ## JWT
 El uso de JWT es para darle robustez y seguridad al proyecto. Está basado en el uso del JSON Web Token. Como referencia,
 se puede utilizar el video encontrado en https://www.youtube.com/watch?v=KxqlJblhzfI. El orden que se muestra a 
@@ -1004,4 +1004,4 @@ public class AuthenticationService {
 ### Uso
 Con toda la configuración cargada, se puede usar un cliente como Postman para realizar las operaciones HTTP. Hay que 
 tomar en consideración que el header de los requests que **no son registro de usuario nuevo** deben ir autenticados en
-el header
+el header con el valor recibido después de acceder. El tipo de token que se debe usar debe ser _Bearer_.
