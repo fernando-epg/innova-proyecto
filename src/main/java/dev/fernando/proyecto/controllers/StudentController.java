@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/v1/api/student")
+@RequestMapping("/api/v1/student")
 public class StudentController {
     
     private final IStudentGenericService service;

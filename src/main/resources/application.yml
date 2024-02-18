@@ -15,7 +15,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create-drop
-      format-sql: true
+    properties:
+      hibernate:
+        format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
@@ -26,3 +28,9 @@ spring:
 springdoc:
   api-docs:
     path: /api-docs
+
+application:
+  security:
+    jwt:
+      secret_key: ${JWT_SECRET_KEY}
+      expiration: 86400000 #1 dia

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+//@Service
 public class MongoDBCourseService implements ICourseGenericService<CourseDTO, String> {
     final private IMongoDBCourseRepository repository;
     

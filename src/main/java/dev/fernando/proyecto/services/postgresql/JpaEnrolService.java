@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-//@Service
+@Service
 public class JpaEnrolService implements IEnrolGenericService<EnrolDTO, Long> {
     
     private final IPostgreSQLEnrolRepository repository;
