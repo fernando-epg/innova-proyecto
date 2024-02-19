@@ -1005,3 +1005,7 @@ public class AuthenticationService {
 Con toda la configuración cargada, se puede usar un cliente como Postman para realizar las operaciones HTTP. Hay que 
 tomar en consideración que el header de los requests que **no son registro de usuario nuevo** deben ir autenticados en
 el header con el valor recibido después de acceder. El tipo de token que se debe usar debe ser _Bearer_.
+
+### Otros recursos:
+* www.youtube.com/watch?v=jQrExUrNbQE - Autenticación basado en Roles
+* www.youtube.com/watch?v=RnZmeczS_DI - Uso de las nuevas versiones de JWT
