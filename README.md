@@ -1,11 +1,189 @@
+_[Spanish version further down](#proyecto-integrador)_
+
+# Captstone project
+
+This is a project for the mid-stack developer course from Innova. The goal is to create a REST API that could be used on a booking system.
+
+This project was coded with the intent of using PostgreSQL and Spring Boot. Also, there's the posibility of using a Non-SQL service in the future.
+
+## Used procedure
+
+1. The model was written on the `models` package.
+2. All of the interfaces are on the `interfaces` package.
+3. The services will be on `services`.
+4. The controllers will be on `controllers`.
+5. The configuration will be on the `application.yml` file.
+
+## Recipe for a similar project
+
+   _We will be assuming that PostgreSQL is already installed and configured on the system._
+
+1. Prepare the project on [Spring Initializer](https://start.spring.io/) with the following dependencies:
+   * Spring data JPA
+   * PostgreSQL Driver
+   * Spring Web
+
+2. Prepare the PostgreSQL server
+   * The database needs to be created and it's advised create a user that acts as _owner_.
+
+   ```sql
+   CREATE USER [user] with password [password];
+   ALTER USER [user] CREATEDB;
+   CREATE DATABASE [database] OWNER [user];
+   ```
+
+3. The project needs to be configured with the connection for the database, and it's recommended the use of system variables. The following needs to be included:
+
+   _It's advised to refactor `application.properties` to `application.yml`_
+
+   ```yaml
+    server:
+      port: [port]
+
+    spring:
+      application:
+        name: [application_name]
+
+      datasource:
+        url: ${DB_URL}
+        username: ${DB_USER}
+        password: ${DB_PASSWORD}
+        driver-class-name: org.postgresql.Driver
+
+      jpa:
+        show-sql: [true/false]
+        hibernate:
+          ddl-auto: [update/create-drop]
+        properties:
+          hibernate:
+            format_sql: [true/false]
+        database: postgresql
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+    ```
+
+4. Create the model and add the tags for it to be considered as entity.
+
+   ```java
+    @Entity
+    public class Model {
+
+        @Id
+        private Long id_property;
+        // ...
+    }
+    ```
+
+5. Create an interface that will work as a repository and it needs to extend `JpaRepository<T, ID>`
+
+   ```java
+    public interface ModelRepository extends JpaRepository<Model, Long> {
+    }
+    ```
+
+6. Create an interface that will be used for CRUD operations
+
+   ```java
+    public interface CrudService<T,ID> {
+        T save(T entity);
+        Optional<T> findById(ID id);
+        List<T> findAll();
+        void deleteById(ID id);
+        void delete(T entity);
+    }
+    ```
+
+7. Create an interface to be used with the specific service.
+
+   ```java
+    public interface Service extends CrudService<Model,Long> {
+        // ...
+    }
+    ```
+
+8. Create a service that implements the service interface that we just created. This is where we need to inject the repository and it needs to implement the necesary methods.
+
+    ```java
+    @Service
+    public class ModelService implements Service {
+        private final ModelRepository modelRepository;
+
+        @Autowired
+        public ModelService(ModelRepository modelRepository) {
+            this.modelRepository = modelRepository;
+        }
+    }
+    ```
+
+9. Create the controller injecting the `Service`.
+
+   ```java
+    @RestController
+    @RequestMapping(/*path*/)
+    public class ModelController {
+        private final ModelService modelService;
+
+        @Autowired
+        public ModelController(ModelService modelService) {
+            this.modelService = modelService;
+        }
+        // ...
+    }
+    ```
+
+10. In the Application class (where `main()` is located), you can configure the execution as follows:
+
+    ```java
+    public class ModelApplication {
+        public static void main(String[] args){
+            ConfigurableApplicationContext applicationContext =
+                SpringApplication.run(ModelApplication.class, args);
+            ModelService modelService = applicationContext.getBean(ModelService.class);
+            System.out.println("Server is running...");
+        }
+    }
+    ```
+
+## Tips
+
+* Use packages to keep the files organized.
+* The interfaces can be named with an uppercase I at the beginning.
+* You can have methods that perform customized SQL actons. [^referencias]
+
+## JWT
+
+The use of JWT is to provide robustness and to the project. This is done using the JSON Web Token. As a reference, you can use the video found in <https://www.youtube.com/watch?v=KxqlJblhzfI>. The following steps are the way it was implemented based on this video.
+
+   _The dependency version used on the project is 0.11.5_
+
+### Dependencies
+
+You must add the following dependencies on the Spring Initializer. If these haven't been addedpreviously, they can be found in <https://mvnrepository.com>.
+The dependencies must be added depending the intended use, and the ones shown here are the minimum ones:
+
+* Spring Web
+* Spring Security
+* Spring Data JPA
+* (Database drive that we'll be using)
+* Lombok (recommended, albeit not required)
+
+## Steps
+
+### Preparation
+
+1. You must configure the datasource (this has already been done previously).
+2. You ust create a new database for the project (this has also been done on previous steps)
+3. You must establish a connection with the database from `application.yml`
+
+***
+
 # Proyecto integrador
-Este es el proyecto del curso de mid-stack developer de Innova. El objetivo es crear un REST Api que se pueda usar en un
-sistema de reservaciones.
 
-Este proyecto se escribió con la intención de usar PostgreSQL, y Spring Boot. También existe la posibilidad de usar un 
-servicio No-SQL en el futuro.
+Este es el proyecto del curso de mid-stack developer de Innova. El objetivo es crear un REST API que se pueda usar en un sistema de reservaciones.
 
-## Procedimiento utilizado.
+Este proyecto se escribió con la intención de usar PostgreSQL, y Spring Boot. También existe la posibilidad de usar un servicio No-SQL en el futuro.
+
+## Procedimiento utilizado
+
 1. Se escribio el modelo a utilizar en el paquete `models`.
 2. Todas las interfaces se encuentran en el paquete `interfaces`
 3. Los servicios estarán en `services`
@@ -13,23 +191,27 @@ servicio No-SQL en el futuro.
 5. La configuración está en el archivo `application.yml`
 
 ## Receta para escribir un proyecto similar
-_Se presume que PostgreSQL ya está instalado_
+
+   _Se presume que PostgreSQL ya está instalado_
+
 1. Preparar el proyecto en [Spring Initializer](https://start.spring.io/) con las siguientes dependencias:
    * Spring Data JPA
    * PostgreSQL Driver
    * Spring Web
-   
+
 2. Preparar el servidor PostgreSQL
    * Se debe crear la base de datos y se aconseja crear un usuario que actue como _owner_ de la misma.
+
    ```sql
-   CREATE USER [user] with password [password]; 
+   CREATE USER [user] with password [password];
    ALTER USER [user] CREATEDB;
    CREATE DATABASE [database] OWNER [user];
    ```
-   
+
 3. Se debe configurar el proyecto para la conexión a la base de datos, y se recomienda el uso de variables de entorno. Se debe incluir lo siguiente:
 
-   _Se recomienda el refactorizar application.properties a application.yml_
+   _Se recomienda el refactorizar `application.properties` a `application.yml`_
+
     ```yaml
     server:
       port: [port]
@@ -54,8 +236,9 @@ _Se presume que PostgreSQL ya está instalado_
         database: postgresql
         database-platform: org.hibernate.dialect.PostgreSQLDialect
     ```
-   
+
 4. Crear el modelo y agregarle las etiquetas para que sea entidad.
+
     ```java
     @Entity
     public class Model {
@@ -65,14 +248,16 @@ _Se presume que PostgreSQL ya está instalado_
         // ...
     }
     ```
-   
+
 5. Crear una interfaz que servira como repositorio y que extienda `JpaRepository<T, ID>`
+
     ```java
     public interface ModelRepository extends JpaRepository<Model, Long> {
     }
     ```
-   
+
 6. Crear una interfaz que sirva para las operaciones CRUD
+
     ```java
     public interface CrudService<T,ID> {
         T save(T entity);
@@ -82,16 +267,17 @@ _Se presume que PostgreSQL ya está instalado_
         void delete(T entity);
     }
     ```
-   
+
 7. Crear una interfaz que sirva para el servicio específico.
+
     ```java
     public interface Service extends CrudService<Model,Long> {
         // ...
     }
     ```
-   
-8. Crear el servicio que implemente la interfaz de servicio recien creada. Aquí es donde se debe inyectar el repositorio.
-y se debe implementar los métodos necesarios.
+
+8. Crear el servicio que implemente la interfaz de servicio recien creada. Aquí es donde se debe inyectar el repositorio y se debe implementar los métodos necesarios.
+
     ```java
     @Service
     public class ModelService implements Service { 
@@ -103,23 +289,25 @@ y se debe implementar los métodos necesarios.
         }    
     }
     ```
-   
+
 9. Crear el controlador inyectando el `Service`.
+
     ```java
     @RestController
     @RequestMapping(/*path*/)
     public class ModelController {
         private final ModelService modelService;
-       
+
         @Autowired
         public ModelController(ModelService modelService) {
             this.modelService = modelService;
         }
-        // ...    
+        // ...
     }
     ```
-   
+
 10. En la clase de Aplicación (donde esta `main()`), se puede configurar la ejecución como sigue:
+
     ```java
     public class ModelApplication {
         public static void main(String[] args){
@@ -132,25 +320,28 @@ y se debe implementar los métodos necesarios.
     ```
 
 ## Consejos
+
 * Utilizar paquetes para mantener los archivos organizados.
 * Las interfaces pueden nombrarse con una i mayúscula antepuesta.
 * Se pueden tener métodos que realicen acciones de SQL personalizadas [^referencias]
 
-[^referencias]: Referencias: 
-  [Spring JPA @Query example: Custom query in Spring Boot](https://www.bezkoder.com/spring-jpa-query/) / 
-  [Hibernate - Query Language](https://www.tutorialspoint.com/hibernate/hibernate_query_language.htm) / 
+[^referencias]: References / Referencias:
+  [Spring JPA @Query example: Custom query in Spring Boot](https://www.bezkoder.com/spring-jpa-query/) /
+  [Hibernate - Query Language](https://www.tutorialspoint.com/hibernate/hibernate_query_language.htm) /
   [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
-****
-## JWT
-El uso de JWT es para darle robustez y seguridad al proyecto. Está basado en el uso del JSON Web Token. Como referencia,
-se puede utilizar el video encontrado en https://www.youtube.com/watch?v=KxqlJblhzfI. El orden que se muestra a 
-continuación, es la manera como se implementó basado en este último video.
+***
 
-_La versión de dependencias que se usa en el proyecto es 0.11.5_
+## JWT
+
+El uso de JWT es para darle robustez y seguridad al proyecto. Está basado en el uso del JSON Web Token. Como referencia, se puede utilizar el video encontrado en <https://www.youtube.com/watch?v=KxqlJblhzfI>. El orden que se muestra a continuación, es la manera como se implementó basado en este último video.
+
+   _La versión de dependencias que se usa en el proyecto es 0.11.5_
 
 ### Dependencias
-Se deben agregar las siguientes dependencias en el Spring Initializer. Si no están, se encuentran en https://mvnrepository.com.
+
+Se deben agregar las siguientes dependencias en el Spring Initializer. Si no están, se encuentran en <https://mvnrepository.com>.
 Las dependencias se deben agregar dependiendo del uso, y las siguientes son las mínimas.
+
 * Spring Web
 * Spring Security
 * Spring Data JPA
@@ -158,7 +349,9 @@ Las dependencias se deben agregar dependiendo del uso, y las siguientes son las 
 * Lombok (recomendado)
 
 ### Pasos
+
 #### Preparación
+
 1. Se configura el datasource (Esto ya está realizado en las secciones anteriores).
 
 2. Se debe crear una nueva base de datos para el proyecto (ya se realizó en los pasos anteriores)
@@ -167,18 +360,19 @@ Las dependencias se deben agregar dependiendo del uso, y las siguientes son las 
 
 4. Se crea la clase que servirá para autenticar (por ejemplo `User`). Se recomienda tener orden en la creación de la
 estructura.
-   * Se recomienda el uso de las anotaciones de **Lombok** `@Data, @Builder, 
+   * Se recomienda el uso de las anotaciones de **Lombok** `@Data, @Builder,
    @NoArgsConstructor`
-   
-5. Se define la Entidad a partir de la clase recién creada con `@Entity`. Si se debe cambiar el nombre de la tabla, se 
-usa la anotación `@Table(name="[nombre_tabla]")`. 
+
+5. Se define la Entidad a partir de la clase recién creada con `@Entity`. Si se debe cambiar el nombre de la tabla, se
+usa la anotación `@Table(name="[nombre_tabla]")`.
 
    También se puede agregar la anotación dentro de `@Table` para definir que una columna deba tener un valor único como
 por ejemplo `@Table(name="_user", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})`
 
 6. Se define cuál será el dato que sirva como llave primaria con `@Id`.
-   * De ser necesario, se debe establecer la secuencia y el valor que deberá usarse. Para esto se puede hacer con lo 
+   * De ser necesario, se debe establecer la secuencia y el valor que deberá usarse. Para esto se puede hacer con lo
    siguiente:
+
     ```java
     @SequenceGenerator(
         name = "user_id_sequence",
@@ -189,17 +383,20 @@ por ejemplo `@Table(name="_user", uniqueConstraints = {@UniqueConstraint(columnN
         generator = "user_id_sequence"
     )
     ```
-   
-7. Con esto ya realizado, se puede correr el proyecto con la intención de verificar que se creen las tablas necesarias en 
+
+7. Con esto ya realizado, se puede correr el proyecto con la intención de verificar que se creen las tablas necesarias en
 la base de datos.
 
 #### Implementación de interfaz `UserDetails`
+
 Se debe implementar `UserDetails` en la clase creada. Se deben implementar los métodos de manera como se necesiten.
 
 8. Implementación de `getAuthorities()`:
+
 * Se debe crear primero algo que muestre los roles del usuario. Para esto se recomienda un `enum` y se debe agregar a la
 clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)` en este `enum`.
 * La implementación puede ser:
+
     ```java
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -207,8 +404,10 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
     }
     ```
   
-9. Implementación de `getUserName()`: 
+9. Implementación de `getUserName()`:
+
 * Si se va a usar el email como usuario, se puede retornar el mismo
+
     ```java
     @Override
     public String getUsername() {
@@ -217,7 +416,9 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
     ```
   
 10. Implementación de `isAccountNonExpired()`:
+
 * Se debe asegurar que sea `true`.
+
     ```java
     @Override
     public boolean isAccountNonExpired() {
@@ -226,7 +427,9 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
     ```
   
 11. Implementación de `isAccountNonLocked()`:
+
 * Debe ser `true` como resultado
+
     ```java
     @Override
     public boolean isAccountNonLocked() {
@@ -235,7 +438,9 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
     ```
   
 12. Implementación de `isCredentialsNonExpired()`:
+
 * Debe devolver `true` como resultado.
+
     ```java
     @Override
     public boolean isCredentialsNonExpired() {
@@ -244,7 +449,9 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
     ```
   
 13. Implementación de `isEnabled()`:
+
 * Debe retornar `true` como resultado.
+
     ```java
     @Override
     public boolean isEnabled() {
@@ -254,6 +461,7 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
   
 14. Si por el uso de Lombok no hay un getter para `password`, es **sumamente recomendable** que se haga un explicito del
 getter de `password`
+
     ```java
     @Override
     public String getPassword() {
@@ -262,28 +470,34 @@ getter de `password`
     ```
 
 #### Creación del repositorio
-15. Se debe crear un repositorio para la clase que se creó en el paso 4. El mismo debe extender el tipo de repository 
+
+15. Se debe crear un repositorio para la clase que se creó en el paso 4. El mismo debe extender el tipo de repository
 que se utilizará (JpaRepository, MongoRepository, etc.)
+
     ```java
     public interface [nombre_repositorio] extends JpaRepository<T,ID> {
     }
     ```
-    
-16. Dentro del repositorio, se deberá agregar un nuevo método para encontrar el usuario por correo. Esto es asumiendo 
+
+16. Dentro del repositorio, se deberá agregar un nuevo método para encontrar el usuario por correo. Esto es asumiendo
 que el correo es un atributo único.
+
     ```java
     Optional<User> findByEmail(String email);
     ```
 
 #### Creación de JWT Filter
-17. Ahora tendremos que crear la configuración para el filtro de JWT. Es recomendable hacerlo dentro de un paquete 
+
+17. Ahora tendremos que crear la configuración para el filtro de JWT. Es recomendable hacerlo dentro de un paquete
 `config`. La configuración debe ser una clase, que tiene que extender `OncePerRequestFilter` como sigue:
+
     ```java
     public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     ```
-    
+
     Esto obliga a implementar los métodos, de `OncePerRequestFilter`, lo cual nos deja con lo siguiente:
+
     ```java
     import org.springframework.lang.NonNull;
         
@@ -300,20 +514,24 @@ que el correo es un atributo único.
     ```
 
   De esto, hay que hacer notar lo siguiente:
-  * Con `request` podemos interceptar todos las operaciónes de request del HTTP.
-  * Con `response` podemos interceptar todas las respuestas que brindamos.
-  * `filterChain` es el listado de filtros que se deberan aplicar en la operación HTTP.
+
+* Con `request` podemos interceptar todos las operaciónes de request del HTTP.
+* Con `response` podemos interceptar todas las respuestas que brindamos.
+* `filterChain` es el listado de filtros que se deberan aplicar en la operación HTTP.
 
 18. Como paso final, hay que usar las anotaciones `@Component` de Spring y `@RequiredArgsContructor` de Lombok.
 
-#### Extracción del Token JWT.
+#### Extracción del Token JWT
+
 19. Lo primero que debemos hacer es recuperar el header del `request`.
+
     ```java
     final String authHeader = request.getHeader("Authorization");
     ```
-    
-20. Luego, debemos confirmar que el header es el que se espera. Al mismo tiempo, guardamos el token JWT en su variable. 
+
+20. Luego, debemos confirmar que el header es el que se espera. Al mismo tiempo, guardamos el token JWT en su variable.
 Si no se encuentra, entonces quiere decir que se debe continuar con el siguiente filtro en la cadena.
+
     ```java
     final String jwt;
     if(authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -321,15 +539,18 @@ Si no se encuentra, entonces quiere decir que se debe continuar con el siguiente
        return;
     }
     ```
-    
+
 21. Si pasamos esta verificación, entonces el token debe ser extraido:
+
     ```java
     jwt = authHeader.substring(7);
     ```
+
   El valor es 7 porque `"Bearer "` tiene 7 caracteres.
 
 ****
 _La clase `JwtAuthenticationFilter` hasta ahora deberá parecer a lo siguiente:_
+
 ```java
 @Component
 @RequiredArgsConstructor
@@ -353,14 +574,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 }
 ```
+
 ****
 
 #### Confirmación que existe el usuario y contraseña
+
 Después de extraer el token JWT, debemos llamar a `UserDetailService` para confirmar si el usuario ya existe. Para esto,
 debemos usar un `JWTService` para extraer el usuario. Si se está usando el correo, esto es lo que se usará como usuario.
 
-22. Extraemos el usuario del `request`, pero para esto vamos a usar otra clase de tipo `JwtService`. Por el momento, lo 
+22. Extraemos el usuario del `request`, pero para esto vamos a usar otra clase de tipo `JwtService`. Por el momento, lo
 dejaremos como TODO.
+
     ```java
     final String userEmail;
     
@@ -371,8 +595,9 @@ dejaremos como TODO.
     jwt = authHeader.substring(7);
     userEmail = //TODO extract userEmail from JWT Token
     ```
-    
+
 23. En la clase, antes del filtrado, crearemos un elemento del tipo `JwtService`. Usaremos esto para extraer el usuario
+
     ```java
     private final JwtService jwtService;
     
@@ -382,9 +607,10 @@ dejaremos como TODO.
     jwt = authHeader.substring(7);
     userEmail = jwtService.extractUsername(jwt);//TODO extract userEmail from JWT Token
     ```
-    
-24. Es en este punto donde creamos la clase (o record) `JwtService`. Dentro de este elemento, creamos el método 
+
+24. Es en este punto donde creamos la clase (o record) `JwtService`. Dentro de este elemento, creamos el método
 `extractUsername()`
+
     ```java
     @Service
     public class JwtService {
@@ -394,9 +620,11 @@ dejaremos como TODO.
     }
     ```
 
-#### Agregar dependencias de JWT.
-25. Para manejar los tokens de JWT se nececita agregar unas dependencias en el `pom.xml`. Con las dependencias 
+#### Agregar dependencias de JWT
+
+25. Para manejar los tokens de JWT se nececita agregar unas dependencias en el `pom.xml`. Con las dependencias
 agregadas, ya podemos continuar en `JwtService`:
+
     ```xml
     <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
     <dependency>
@@ -423,7 +651,9 @@ agregadas, ya podemos continuar en `JwtService`:
     ```
 
 #### Extrayendo "claims"
+
 26. Para facilitar la operación, se puede extraer todos los claims con un método privado en `JwtService`:
+
     ```java
     private Claims extractAllClaims(String token) {
          return Jwts
@@ -434,14 +664,16 @@ agregadas, ya podemos continuar en `JwtService`:
                  .getBody();
     }
     ```
-    
-#### Uso de la llave de firmado (SignInKey)
-La llave de SignInKey sirve para asegurar que el cliente es quien dice ser.
-27. Se debe crear una llave secreta de al menos 256 bits. Para esto se pueden usar herramientas en línea. Una 
-herramienta que puede usarse es https://www.devglan.com/online-tools/hmac-sha256-online
 
-28. Una vez que se ha creado la llave, se puede usar como variable de entorno y se puede hacer el uso desde el 
+#### Uso de la llave de firmado (SignInKey)
+
+La llave de SignInKey sirve para asegurar que el cliente es quien dice ser.
+27. Se debe crear una llave secreta de al menos 256 bits. Para esto se pueden usar herramientas en línea. Una
+herramienta que puede usarse es <https://www.devglan.com/online-tools/hmac-sha256-online>
+
+28. Una vez que se ha creado la llave, se puede usar como variable de entorno y se puede hacer el uso desde el
 `application.yml` agregando lo siguiente
+
     ```yml
     application:
       security:
@@ -451,6 +683,7 @@ herramienta que puede usarse es https://www.devglan.com/online-tools/hmac-sha256
     ```
 
 29. Luego en `JwtService`, se puede agregar la llave con:
+
     ```java
     @Value("${application.security.jwt.secret_key}")
     private static String SECRET_KEY;
@@ -458,8 +691,9 @@ herramienta que puede usarse es https://www.devglan.com/online-tools/hmac-sha256
     @Value("${application.security.jwt.expiration}")
     private static Long EXPIRATION;
     ```
-    
+
 30. Ya con la llave agregada, se puede implementar el método `getSignInKey()` que tenemos pendiente.
+
     ```java
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
@@ -467,8 +701,10 @@ herramienta que puede usarse es https://www.devglan.com/online-tools/hmac-sha256
     }
     ```
 
-#### Extracción de solo 1 claim.
+#### Extracción de solo 1 claim
+
 31. Con lo anterior listo, podemos extraer un claim único con lo siguiente:
+
     ```java
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -477,9 +713,11 @@ herramienta que puede usarse es https://www.devglan.com/online-tools/hmac-sha256
     ```
 
 #### Extracción del username
+
 En el paso 24, dejamos pendiente el proceso de extracción de usuario. Es momento de implementarlo.
 
 32. Para extraer el usuario, se hace lo siguiente:
+
     ```java
     public String extractUsername(String token) {
         return extractClaim(token,Claims::getSubject);
@@ -487,9 +725,11 @@ En el paso 24, dejamos pendiente el proceso de extracción de usuario. Es moment
     ```
 
 #### Generación de JWT
+
 Vamos a implementar la generación de un token JWT.
 
 33. El token JWT se puede crear con:
+
     ```java
     public String generateToken(
             Map<String,Object> extraClaims,
@@ -512,17 +752,20 @@ Vamos a implementar la generación de un token JWT.
     ```
 
     Si se necesita un token sin `extraClaims`, esto se puede hacer como sigue:
+
     ```java
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
     ```
-   
-Ambos métodos, de ser necesario, pueden ser `private`, y solo se usa otro método para no exponer el método de forma 
+
+Ambos métodos, de ser necesario, pueden ser `private`, y solo se usa otro método para no exponer el método de forma
 directa.
 
 #### Validación de token
+
 34. Se puede validar el token de la siguiente manera:
+
     ```java
     public boolean isTokenValid(String token, UserDetails userDetails) {
        final String username = extractUsername(token);
@@ -531,6 +774,7 @@ directa.
     ```
 
 35. Para verificar si el token está expirado, utilizamos 2 métodos, `isTokenExpired()` y `extractExpiration()`:
+
     ```java
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).isBefore(LocalDateTime.now());
@@ -543,9 +787,10 @@ directa.
                .toLocalDateTime();
     }
     ```
-    
+
 ****
 _El servicio debería estar como sigue:_
+
 ```java
 @Service
 public class JwtService {
@@ -618,14 +863,17 @@ public class JwtService {
     }
 }
 ```
+
 ****
 
 #### Terminando el proceso de validación
+
 Ahora podemos regresar a `JwtAuthenticationFilter` y terminar los procesos de validación.
 
-36. Primero debemos confirmar si el usuario ya ha sido validado previamente. Esto es para no estar validando hacia la 
-base de datos de identidad con cada operación. Para esto, tendremos también que crear un elemento del tipo 
+36. Primero debemos confirmar si el usuario ya ha sido validado previamente. Esto es para no estar validando hacia la
+base de datos de identidad con cada operación. Para esto, tendremos también que crear un elemento del tipo
 `UserDetailService`, el cual será una implementación propia.
+
     ```java
     private final UserDetailsService userDetailsService;
 
@@ -637,11 +885,12 @@ base de datos de identidad con cada operación. Para esto, tendremos también qu
            UserDetails userDetails = this.userDetailsService.loadByUsername(userEmail);
     }
     ```
-    
-37. Ahora, debemos hacer una clase que servirá para configurar algunas inyecciones. Crearemos una clase en un paquete 
+
+37. Ahora, debemos hacer una clase que servirá para configurar algunas inyecciones. Crearemos una clase en un paquete
 `config` llamada `ApplicationConfiguration`.
 
     Debemos agregarle también las anotaciones de `@Configuration` y `@RequiredArgsConstructor`:
+
     ```java
     @Configuration
     @RequiredArgsConstructor
@@ -649,8 +898,9 @@ base de datos de identidad con cada operación. Para esto, tendremos también qu
         
     }
     ```
-    
+
 38. Ahora debemos crear un `@Bean` para el servicio que se necesita de `UserDetailsService`
+
     ```java
     private final IUserRepository userRepository;
 
@@ -660,9 +910,10 @@ base de datos de identidad con cada operación. Para esto, tendremos también qu
                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
     ```
-    
-39. Con el `@Bean` creado, tenemos el requisito que dejamos pendiente en `JwtAuthenticationFilter`. Ahora, podemos terminar 
+
+39. Con el `@Bean` creado, tenemos el requisito que dejamos pendiente en `JwtAuthenticationFilter`. Ahora, podemos terminar
 de valider el usuario, como sigue:
+
     ```java
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
           UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
@@ -679,10 +930,11 @@ de valider el usuario, como sigue:
           }
     }   
     ```
-    
+
 Con esto ya está el filtro configurado, y ya solo queda pasarle la batuta al siguiente filtro.
 ****
 _La clase debería verse algo como lo que sigue:_
+
 ```java
 @Component
 @RequiredArgsConstructor
@@ -725,11 +977,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 }
 ```
+
 ****
 
 #### SecurityConfig
+
 40. Aún con todo el trabajo hecho, falta una configuración que permita disparar todas las operaciones en el momento adecuado.
 Para esto, haremos una nueva clase llamada `SecurityConfiguration`
+
     ```java
     @Configuration
     @EnableWebSecurity
@@ -737,12 +992,13 @@ Para esto, haremos una nueva clase llamada `SecurityConfiguration`
         public class SecurityConfiguration {
     }
     ```
-    
+
    **Las anotaciones `@Configuration` y `@EnableWebSecurity` deben siempre estar juntas.**
 
-41. Antes de continuar, debemos definir si usaremos una lista de endpoints que no necesitan autenticación (como por 
-ejemplo, si se está registrando un usuario). Esto se puede hacer, primero definiendo el listado de los endpoints como 
+41. Antes de continuar, debemos definir si usaremos una lista de endpoints que no necesitan autenticación (como por
+ejemplo, si se está registrando un usuario). Esto se puede hacer, primero definiendo el listado de los endpoints como
 sigue con lo siguiente:
+
     ```java
     private static final String[] WHITE_LIST_URL = {
             "/api/v1/health", 
@@ -751,18 +1007,22 @@ sigue con lo siguiente:
     ```
 
 42. También debemos crear la asociación para el uso del filtro `JwtAuthenticationFilter`
+
     ```java
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     ```
-    
-43. Por último, debemos agregar un proveedor de autenticación. Este tendrá que ser de tipo `AuthenticationProvider`, el 
+
+43. Por último, debemos agregar un proveedor de autenticación. Este tendrá que ser de tipo `AuthenticationProvider`, el
 cual será un Bean en `ApplicationConfig`
+
     ```java
     private final AuthenticationProvider authenticationProvider;
     ```
 
 #### De regreso a `ApplicationConfig`
+
 44. En `ApplicationConfig` tendremos que hacer un Bean que se encargue de proveer la autenticación. Usaremos el tipo DAO.
+
     ```java
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -772,18 +1032,21 @@ cual será un Bean en `ApplicationConfig`
        return authProvider;
     }   
     ```
-   Hay que recordar que el `UserDetailsService`que se está usando es el que se definió en el paso 38. 
-   
-45. También hay que agregar un encodificador para las contraseñas. Esto se hace con el Bean `passwordEncoder()`, que 
+
+   Hay que recordar que el `UserDetailsService`que se está usando es el que se definió en el paso 38.
+
+45. También hay que agregar un encodificador para las contraseñas. Esto se hace con el Bean `passwordEncoder()`, que
 puede ser como sigue:
+
     ```java
     @Bean
     private PasswordEncoder passwordEncoder() {
          return new BCryptPasswordEncoder();
     }
     ```
-    
+
 46. Por último, hay que crear un Bean que será de tipo `AuthenticationManager`, como sigue:
+
     ```java
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
@@ -792,8 +1055,10 @@ puede ser como sigue:
     ```
 
 #### Controlador de autenticación
-47. Ahora debemos configurar 2 endpoints que nos servirán para las tareas de autenticación (registrar y acceder). Para 
+
+47. Ahora debemos configurar 2 endpoints que nos servirán para las tareas de autenticación (registrar y acceder). Para
 esto, vamos a usar un controlador llamado `AuthenticationController`
+
     ```java
     @RestController
     @RequestMapping("/api/v1/auth")
@@ -801,8 +1066,9 @@ esto, vamos a usar un controlador llamado `AuthenticationController`
     public class AuthenticationController {
     }   
     ```
-    
+
 48. Creamos 2 endpoints, uno para registro y el otro para autenticar:
+
     ```java
     @PostMapping("/register")
     public ResponseEntity<AutheticationResponse> register(
@@ -818,9 +1084,10 @@ esto, vamos a usar un controlador llamado `AuthenticationController`
         //
     }
     ```
-    
+
 49. Tendremos que implementar `AuthenticationResponse`, `RegisterRequest`, y `AuthenticationRequest`
     1. Se debe crear la clase `AuthenticationResponse` que puede ser como sigue:
+
     ```java
     @Data
     @Builder
@@ -830,9 +1097,10 @@ esto, vamos a usar un controlador llamado `AuthenticationController`
         private String token;
     }
     ```
-    
-    2. La clase `RegisterRequest`, que puede entenderse como un DTO, se debe crear y podría ser como sigue _Este 
-    elemento puede ser un **record**_: 
+
+    2. La clase `RegisterRequest`, que puede entenderse como un DTO, se debe crear y podría ser como sigue _Este
+    elemento puede ser un **record**_:
+
     ```java
     @Data
     @Builder
@@ -845,7 +1113,9 @@ esto, vamos a usar un controlador llamado `AuthenticationController`
         private String password;
     }
     ```
+
     3. La clase `AuthenticationRequest` también puede ser un DTO, y podría implementarse como sigue:
+
     ```java
     @Data
     @Builder
@@ -857,8 +1127,9 @@ esto, vamos a usar un controlador llamado `AuthenticationController`
     }
     ```
 
-****
+***
 _El controlador `AuthenticationController` debería verse como sigue:_
+
 ```java
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -881,11 +1152,14 @@ public class AuthenticationController {
     }
 }
 ```
-****
-    
+
+***
+
 #### Servicio de Autenticación
-50. Se debe crear ahora un servicio que manejará las operaciones de Autenticación. Este servicio puede estar en la clase 
+
+50. Se debe crear ahora un servicio que manejará las operaciones de Autenticación. Este servicio puede estar en la clase
 `AuthenticationService`. En la clase, hay que agregar las anotaciones de `@Service`y `@RequiredArgsConstructor`.
+
     ```java
     @Service
     @RequiredArgsConstructor
@@ -893,8 +1167,9 @@ public class AuthenticationController {
     }
     ```
 
-51. Con este último servicio, se puede proceder a inyectar en `AuthenticationController` y usarlo para retornar los 
+51. Con este último servicio, se puede proceder a inyectar en `AuthenticationController` y usarlo para retornar los
 objetos necesarios:
+
     ```java
     private final AuthenticationService service;
     
@@ -912,10 +1187,12 @@ objetos necesarios:
         return ResponseEntity.ok(service.authenticate(request));
     }
     ```
+
     Notese que hay que implementar los métodos `register()` y `authenticate()` en el servicio.
 
-52. Para el método `register()` hay que inyectar el repositorio (paso 15), el codificador de contraseña (paso 45) y el 
+52. Para el método `register()` hay que inyectar el repositorio (paso 15), el codificador de contraseña (paso 45) y el
 servicio JWT (pasos 29-35) y se puede implementar como sigue:
+
     ```java
     private final IUserRepository repository;
     private final PasswordEncoder passwordEncoder;
@@ -936,8 +1213,9 @@ servicio JWT (pasos 29-35) y se puede implementar como sigue:
     }
     ```
 
-53. Para `authenticate()` se puede usar el Bean de `AuthenticationManager`(paso 46), que deberá ser inyectado y puede 
+53. Para `authenticate()` se puede usar el Bean de `AuthenticationManager`(paso 46), que deberá ser inyectado y puede
 implementarse como sigue:
+
     ```java
     private final AuthenticationManager authenticationManager;
     // ...
@@ -957,8 +1235,10 @@ implementarse como sigue:
                 .build();
     }
     ```
-****
+
+***
 _La clase `AuthenticationService` deberia estar parecido a lo siguiente:_
+
 ```java
 @Service
 @RequiredArgsConstructor
@@ -999,13 +1279,16 @@ public class AuthenticationService {
     }
 }
 ```
-****
+
+***
 
 ### Uso
-Con toda la configuración cargada, se puede usar un cliente como Postman para realizar las operaciones HTTP. Hay que 
+
+Con toda la configuración cargada, se puede usar un cliente como Postman para realizar las operaciones HTTP. Hay que
 tomar en consideración que el header de los requests que **no son registro de usuario nuevo** deben ir autenticados en
 el header con el valor recibido después de acceder. El tipo de token que se debe usar debe ser _Bearer_.
 
-### Otros recursos:
-* www.youtube.com/watch?v=jQrExUrNbQE - Autenticación basado en Roles
-* www.youtube.com/watch?v=RnZmeczS_DI - Uso de las nuevas versiones de JWT
+### Otros recursos
+
+* <www.youtube.com/watch?v=jQrExUrNbQE> - Autenticación basado en Roles
+* <www.youtube.com/watch?v=RnZmeczS_DI> - Uso de las nuevas versiones de JWT
