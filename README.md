@@ -173,6 +173,898 @@ The dependencies must be added depending the intended use, and the ones shown he
 1. You must configure the datasource (this has already been done previously).
 2. You ust create a new database for the project (this has also been done on previous steps)
 3. You must establish a connection with the database from `application.yml`
+4. The class that would be used to authenticate (for example `User`). It's advised to have it organized whilst the structure creation.
+   * It's advised the use of **Lombok** annotations `@Data, @Builder, @NoArgsConstructor`.
+5. The Entity needs to be defined based on the recently created class with `@Entity`. If you need to change the name of the table, you would use the tag `@Table(name="[table_name]")`. Also you can add the tag within `@Table` to define that a particular column should have a unique value such as `@Table(name="_user", uniqueConstraints = {@UniqueConstrait(columnNames={"email"})})`.
+6. The Primary Key should be defined with `@Id`.
+   * If needed, you will need to establis the sequence and value that needs to be used. You could use the following:
+
+    ```java
+    @SequenceGenerator(
+        name = "user_id_sequence",
+        sequenceName = "user_id_sequence"
+    )
+    @GeneratedValue(
+        strategy = GenerationType.SEQUENCE,
+        generator = "user_id_sequence"
+    )
+    ```
+
+7. With all this already done, you can run the project with the intent of checking that the tables are created in the database.
+
+### `UserDetails` interface implementation
+
+You will need to implement `UserDetails` on the created class. You need to implement the methods as needed.
+
+8. `getAuthorities()` implementation:
+
+* First, you will need to create something that shows the roles for the user. For this, it's recommended an `enum` and needs to be added to the class from step 4. It's recommended the use of the tag `@Enumerated(EnumType.STRING)` on this `enum`.
+* The implementation could be:
+
+    ```java
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+    ```
+
+9. `getUserName()` implementation:
+
+* If you would be used the email as user, you could return it
+
+    ```java
+    @Override
+    public String getUsername() {
+        return email;
+    }
+    ```
+
+10. `isAccountNonExpired()` implementation:
+
+* You must ensure that this is `true`.
+
+    ```java
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+    ```
+
+11. `isAccountNonLocked()` implementation:
+
+* Must be `true` as a result
+
+    ```java
+    @Override
+    public boolean isAccountNonLocked() {
+       return true;
+    }
+    ```
+
+12. `isCredentialsNonExpired()` implementation:
+
+* Must return `true` as a result.
+
+    ```java
+    @Override
+    public boolean isCredentialsNonExpired() {
+       return true;
+    }
+    ```
+
+13. `isEnabled()` implementation:
+
+* Must return `true` as a result.
+
+    ```java
+    @Override
+    public boolean isEnabled() {
+       return true;
+    }
+    ```
+
+14. If due to using Lombok there's no getter for `password`, it's **strongly suggested** that you include the password getter explicitly.
+
+    ```java
+    @Override
+    public String getPassword() {
+       return password;
+    }
+    ```
+
+#### Repository creation
+
+15. A repository needs to be created for the class that was created in step 4. This needs to extend the repository type that will need to be used (`JpaRepository`, `MongoRepository`, etc.).
+
+    ```java
+    public interface [nombre_repositorio] extends JpaRepository<T,ID> {
+    }
+    ```
+
+16. Within the repository, you must add a new method to find the user with the email, this is assuming that the email is the unique attribute.
+
+    ```java
+    Optional<User> findByEmail(String email);
+    ```
+
+#### JWT Filter creation
+
+17. Now we would need to create the configuration for the JWT filter. It's advisable doing it within the `config` package. The configuration must be a class, that needs to extend `OncePerRequestFilter` as follows:
+
+    ```java
+    public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    }
+    ```
+
+    This forces the `OncePerRequestFilter` methods, which leaves us with:
+
+    ```java
+    import org.springframework.lang.NonNull;
+
+    public class JwtAuthenticationFilter extends OncePerRequestFilter {
+        @Override
+        protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+        ) throws ServletException, IOException {
+
+        }
+    }
+    ```
+
+   From this, we would need to notice the following:
+
+* With `request` we can catch all the operations for the HTTP request.
+* With `response` we can catch all the replies we provide.
+* `filterChain` is the list of filters that needs to be applied on the HTTP operation.
+
+18. As a final step, we need to use the Spring tag `@Component` and Lombok tag `@RequiredArgsConstructor`.
+
+#### JWT Token extraction
+
+19. First, we will need to retrieve the header from the `request`.
+
+    ```java
+    final String authHeader = request.getHeader("Authorization");
+    ```
+
+20. Then, we need to confirm that the header is the one that's expected. At the same time, we will store the JWT Token with its variable. If it can't be found, then it means that it needs to conitnue with the next filter on the chain.
+
+    ```java
+    final String jwt;
+    if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+       filterChain.doFilter(request,response);
+       return;
+    }
+    ```
+
+21. If this verification is passed, then the token must be extracted:
+
+    ```java
+    jwt = authHeader.substring(7);
+    ```
+
+  The value is 7, as `"Bearer "` is 7 characters long.
+
+***
+
+_The `JwtAuthenticationFilter` class should look as follows so far:_
+
+```java
+@Component
+@RequiredArgsConstructor
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    
+    @Override
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
+        
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        
+        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request,response);
+            return;
+        }
+        jwt = authHeader.substring(7);
+    }
+}
+```
+
+***
+
+#### Confirming the existence of user and password
+
+After extracting the JWT token, we must call `UserDetailService` to confirm that the user already exists. For this, we need to use a `JWTService` to extract the username. If we're using the email, this is what will be used as user.
+
+22. We'll extract the user from `request`, but for this we'll use another class of type `JwtService`. For the time being, we'll leave it asa TODO.
+
+    ```java
+    final String userEmail;
+
+    if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+       filterChain.doFilter(request,response);
+       return;
+    }
+    jwt = authHeader.substring(7);
+    userEmail = //TODO extract userEmail from JWT Token
+    ```
+
+23. In the class, befor the filter, we will create a `JwtService` element. We'll be using this to extract the user.
+
+    ```java
+    private final JwtService jwtService;
+
+    @Override
+    protected void doFilterInternal(
+    // ...
+    jwt = authHeader.substring(7);
+    userEmail = jwtService.extractUsername(jwt);//TODO extract userEmail from JWT Token
+    ```
+
+24. It's at this point where we create the `JwtService` class (or record). Within this class, we create the method `extractUsername()`.
+
+    ```java
+    @Service
+    public class JwtService {
+       public String extractUsername(String token) {
+           return null; // For the moment.
+       }
+    }
+    ```
+
+#### Adding JWT dependencies
+
+25. To manage the JWT tokens we need to add some dependencies on `pom.xml`. After adding these dependencies, we can continue on `JwtService`:
+
+    ```xml
+    <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>0.11.5</version>
+        <scope>runtime</scope>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>0.11.5</version>
+        <scope>runtime</scope>
+    </dependency>
+    ```
+
+#### Extracting "claims"
+
+26. To ease the operation, you can extract all claims with a private method on `JwtService`:
+
+    ```java
+    private Claims extractAllClaims(String token) {
+         return Jwts
+                 .parserBuilder()
+                 .setSigningKey(getSignInKey())
+                 .build()
+                 .parseClaimsJws(token)
+                 .getBody();
+    }
+    ```
+
+#### Use of the SignInKey
+
+The SignInKey is used to ensure that the client is whoever it claims to be.
+
+27. You need to create a secret 256-bit minimum key. For this, you can use online tools, such as <https://www.devglan.com/online-tools/hmac-sha256-online>.
+
+28. Once the key has been created, you can use it as an environment value and add it to `application.yml` as follows:
+
+    ```yml
+    application:
+      security:
+        jwt:
+          secret_key: ${JWT_SECRET_KEY}
+          expiration: 86400000 #1 dia
+    ```
+
+29. Then, on `JwtService` you can add the key with:
+
+    ```java
+    @Value("${application.security.jwt.secret_key}")
+    private static String SECRET_KEY;
+
+    @Value("${application.security.jwt.expiration}")
+    private static Long EXPIRATION;
+    ```
+
+30. With the key already added, we can implement the `getSignInKey()` method that was pending.
+
+    ```java
+    private Key getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+    ```
+
+#### Single claim extraction
+
+31. With all prior steps ready, we can extract a unique claim as follows:
+
+    ```java
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+    ```
+
+#### Username extraction
+
+In step 24, we had a pending process to extract the username. It's time to implement it.
+
+32. To extract the username, we need to do it as follows:
+
+    ```java
+    public String extractUsername(String token) {
+        return extractClaim(token,Claims::getSubject);
+    }
+    ```
+
+#### JWT generation
+
+We're implementing now the JWT generation.
+
+33. The JWT token can be created with:
+
+    ```java
+    public String generateToken(
+            Map<String,Object> extraClaims,
+            UserDetails userDetails
+    ) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(Date.from(LocalDateTime.now()
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .setExpiration(Date.from(LocalDateTime.now()
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .plusMillis(EXPIRATION)))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+        }
+    ```
+
+    If you need a token without `extraClaims` you would need something along the following:
+
+    ```java
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails);
+    }
+    ```
+
+Both methods, depending on the use, can be `private`, and just use another method not to expose the method directly.
+
+#### Token validation
+
+34. A token can be validated as follows:
+
+    ```java
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+       final String username = extractUsername(token);
+       return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+    ```
+
+35. To verify if the token is expired, we'll be using 2 methods, `isTokenExpired()` y `extractExpiration()`:
+
+    ```java
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).isBefore(LocalDateTime.now());
+    }
+
+    private LocalDateTime extractExpiration(String token) {
+    Date date = extractClaim(token, Claims::getExpiration);
+    return date.toInstant()
+               .atZone(ZoneId.systemDefault())
+               .toLocalDateTime();
+    }
+    ```
+
+***
+_The service should be as follows:_
+
+```java
+@Service
+public class JwtService {
+    @Value("${application.security.jwt.secret_key}")
+    private static String SECRET_KEY;
+
+    @Value("${application.security.jwt.expiration}")
+    private static Long EXPIRATION;
+
+    public String extractUsername(String token) {
+        return extractClaim(token,Claims::getSubject);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails);
+    }
+
+    public String generateToken(
+            Map<String,Object> extraClaims,
+            UserDetails userDetails
+    ) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(Date.from(LocalDateTime.now()
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .setExpiration(Date.from(LocalDateTime.now()
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .plusMillis(EXPIRATION)))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).isBefore(LocalDateTime.now());
+    }
+
+    private LocalDateTime extractExpiration(String token) {
+        Date date = extractClaim(token, Claims::getExpiration);
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts
+                .parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    private Key getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+}
+```
+
+#### Finishing the validation process
+
+Now we can go back to `JwtAuthenticationFilter` and finish the validation process.
+
+36. First, we must confirm if the user has been validated previously. This is done for us not needing to validate every single time to the identity database. For this, we will need to create a `UserDetailService` element, which will be a self implementation.
+
+    ```java
+    private final UserDetailsService userDetailsService;
+
+    // ...
+
+    jwt = authHeader.substring(7);
+    userEmail = jwtService.extractUsername(jwt);
+    if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+           UserDetails userDetails = this.userDetailsService.loadByUsername(userEmail);
+    }
+    ```
+
+37. Now, we must create a class that will work to configure some injections. We'll create a class on the `config` package called `config` llamada `ApplicationConfiguration`.
+
+    We must add the `@Configuration` and `@RequiredArgsConstructor` tags:
+
+    ```java
+    @Configuration
+    @RequiredArgsConstructor
+    public class ApplicationConfig {
+
+    }
+    ```
+
+38. We'll need to create a `@Bean` now for the service that requires `UserDetailsService`
+
+    ```java
+    private final IUserRepository userRepository;
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+    return username -> userRepository.findByEmail(username)
+               .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+    ```
+
+39. With the `@Bean` created, we need the requirement that we had pending on `JwtAuthenticationFilter`. Now, we can finish validating the user as follows:
+
+    ```java
+        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+          UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+          if(jwtService.isTokenValid(jwt,userDetails)) {
+              UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                      userDetails,
+                     null,
+                      userDetails.getAuthorities()
+              );
+              authToken.setDetails(
+                     new WebAuthenticationDetailsSource().buildDetails(request)
+              );
+              SecurityContextHolder.getContext().setAuthentication(authToken);
+          }
+    }
+    ```
+
+With this, the filter is already configured, and we can just pass it on to the next filter.
+***
+_The class should look as follows:_
+
+```java
+@Component
+@RequiredArgsConstructor
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    @Override
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
+
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String userEmail;
+
+        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request,response);
+            return;
+        }
+        jwt = authHeader.substring(7);
+        userEmail = jwtService.extractUsername(jwt);
+        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if(jwtService.isTokenValid(jwt,userDetails)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+        filterChain.doFilter(request,response);
+    }
+}
+```
+
+#### SecurityConfig
+
+40. Even with all the work that has been done, we're still missing a configuration that would allow the operations to be triggered at the right moment. For this, we'll create a new class called `SecurityConfiguration`.
+
+    ```java
+    @Configuration
+    @EnableWebSecurity
+    @RequiredArgsConstructor
+        public class SecurityConfiguration {
+    }
+    ```
+
+   **The `@Configuration` and `@EnableWebSecurity` tags should always be together.**
+
+41. Before continuing, we must define if we're gonna be using a list of endpoints for which we won't be requiring authentication (such as if the user is registering). This can be done first by defining a list of the endpoints as:
+
+    ```java
+    private static final String[] WHITE_LIST_URL = {
+            "/api/v1/health", 
+            "/api/v1/auth/**"
+    };
+    ```
+
+42. We would also require to create an associtation for the use on `JwtAuthenticationFilter`:
+
+    ```java
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    ```
+
+43. Last, we need to add an authentication provider. This will have to be of `AuthenticationProvider` type, which would be an `ApplicationConfig` Bean:
+
+    ```java
+    private final AuthenticationProvider authenticationProvider;
+    ```
+
+#### Back to `ApplicationConfig`
+
+44. On `ApplicationConfig` we would need to create a Bean that handles the authentication, we'll be using a DAO type object.
+
+    ```java
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+       DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+       authProvider.setUserDetailsService(userDetailsService());
+      authProvider.setPasswordEncoder(passwordEncoder());
+       return authProvider;
+    }
+    ```
+
+   We must remember that the `UserDetailsService` that's being used was defined in step 38.
+
+45. We will need to also add an encoder for the passwords. This can be done with the `passwordEncoder()` Bean, that can be as follows:
+
+    ```java
+    @Bean
+    private PasswordEncoder passwordEncoder() {
+         return new BCryptPasswordEncoder();
+    }
+    ```
+
+46. Last, we need to create a Bean of `AuthenticationManager` type as follows:
+
+    ```java
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
+        return config.getAuthenticationManager();
+    }
+    ```
+
+#### Authentication controller
+
+47. We will need to configure 2 endpoints that will be used for the authentication tasks (register and logging in). For this, well be using a controller called `AuthenticationController`:
+
+    ```java
+    @RestController
+    @RequestMapping("/api/v1/auth")
+    @RequiredArgsConstructor
+    public class AuthenticationController {
+    }
+    ```
+
+48. We create 2 endpoints, one for the registry and one for the authentication:
+
+    ```java
+    @PostMapping("/register")
+    public ResponseEntity<AutheticationResponse> register(
+            @RequestBody RegisterRequest request
+    ) {
+        //
+    }
+    
+    @PostMapping("/authenticate")
+    public ResponseEntity<AutenticationResponse> register(
+           @RequestBody AuthenticationRequest request
+    ) {
+        //
+    }
+    ```
+
+49. We'll need to implement `AuthenticationResponse`, `RegisterRequest`, and `AuthenticationRequest`
+    1. We need to create the class `AuthenticationResponse` that can be as follows:
+
+    ```java
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class AutheticationResponse {
+        private String token;
+    }
+    ```
+
+    2. The `RegisterRequest` class, that can be understood as a DTO, needs to be created and could be as follows. _This element can be a **record**_:
+
+    ```java
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class RegisterRequest {
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String password;
+    }
+    ```
+
+    3. The `AuthenticationRequest` class can also be a DTO, and could be implemented as follows:
+
+    ```java
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class AuthenticationRequest {
+        private String email;
+        private String password;
+    }
+    ```
+
+***
+_The `AuthenticationController` controlles should look like this:_
+
+```java
+@RestController
+@RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
+public class AuthenticationController {
+    private final AuthenticationService service;
+    
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> register(
+            @RequestBody RegisterRequest request
+    ) {
+        return ResponseEntity.ok(service.register(request));
+    }
+    
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthenticationResponse> register(
+            @RequestBody AuthenticationRequest request
+    ) {
+        return ResponseEntity.ok(service.authenticate(request));
+    }
+}
+```
+
+***
+
+#### Authentication service
+
+50. A new service needs to be created and will handle the authentication operations. This service can be on the `AuthenticationService` class. In the class the `@Service` adn `@RequiredArgsConstructor` tags must be added:
+
+    ```java
+    @Service
+    @RequiredArgsConstructor
+    public class AuthenticationService {
+    }
+    ```
+
+51. With this last service, we can proceed to inject to `AuthenticationController` and use it to return the necessary objects:
+
+    ```java
+    private final AuthenticationService service;
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> register(
+            @RequestBody RegisterRequest request
+    ) {
+        return ResponseEntity.ok(service.register(request));
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthenticationResponse> register(
+            @RequestBody AuthenticationRequest request
+    ) {
+        return ResponseEntity.ok(service.authenticate(request));
+    }
+    ```
+
+    Note that the `register()` and `authenticate()` methodds need to be implemented on the servie.
+
+52. For the `register()` method we will need to inject the repository (step 15), the password encoder (step 45) and the JWT service (steps 29-35) and can be implemented as follows:
+
+    ```java
+    private final IUserRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    public AuthenticationResponse register(RegisterRequest request) {
+        var user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(ERole.STUDENT)
+                .build();
+        repository.save(user);
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+    ```
+
+53. For `authenticate()` you can use the `AuthenticationManager`Bean (step 46), which needs to be injected and can be implemented as follows:
+
+    ```java
+    private final AuthenticationManager authenticationManager;
+    // ...
+    
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        var user = repository.findByEmail(request.getEmail())
+                .orElseThrow();
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+    ```
+
+***
+_The `AuthenticationService` class should look like this:_
+
+```java
+@Service
+@RequiredArgsConstructor
+public class AuthenticationService {
+    
+    private final IUserRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+    public AuthenticationResponse register(RegisterRequest request) {
+        var user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(ERole.STUDENT)
+                .build();
+        repository.save(user);
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+    
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        var user = repository.findByEmail(request.getEmail())
+                .orElseThrow();
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+}
+```
+
+***
+
+### Use
+
+With all the configuration loaded, we can use a client like Postman to perform HTTP operations. We need to consider that on the header of the requests **that are not for new user** they will need to be authenticated with the value recieved after the successful log in. The tipe of token to be used should be _Bearer_.
+
+### Other resources
+
+* <www.youtube.com/watch?v=jQrExUrNbQE> - Authentication based on roles
+* <www.youtube.com/watch?v=RnZmeczS_DI> - Use of new versions of JWT
 
 ***
 
@@ -215,17 +1107,17 @@ Este proyecto se escribió con la intención de usar PostgreSQL, y Spring Boot. 
     ```yaml
     server:
       port: [port]
-    
+
     spring:
       application:
         name: [application_name]
-       
+
       datasource:
         url: ${DB_URL}
         username: ${DB_USER}
         password: ${DB_PASSWORD}
         driver-class-name: org.postgresql.Driver
-         
+
       jpa:
         show-sql: [true/false]
         hibernate:
@@ -242,7 +1134,7 @@ Este proyecto se escribió con la intención de usar PostgreSQL, y Spring Boot. 
     ```java
     @Entity
     public class Model {
-        
+
         @Id
         private Long id_property;
         // ...
@@ -329,6 +1221,7 @@ Este proyecto se escribió con la intención de usar PostgreSQL, y Spring Boot. 
   [Spring JPA @Query example: Custom query in Spring Boot](https://www.bezkoder.com/spring-jpa-query/) /
   [Hibernate - Query Language](https://www.tutorialspoint.com/hibernate/hibernate_query_language.htm) /
   [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
+
 ***
 
 ## JWT
@@ -353,25 +1246,13 @@ Las dependencias se deben agregar dependiendo del uso, y las siguientes son las 
 #### Preparación
 
 1. Se configura el datasource (Esto ya está realizado en las secciones anteriores).
-
-2. Se debe crear una nueva base de datos para el proyecto (ya se realizó en los pasos anteriores)
-
-3. Se establece la conexión con la base de datos a partir de `application.yml`
-
-4. Se crea la clase que servirá para autenticar (por ejemplo `User`). Se recomienda tener orden en la creación de la
-estructura.
-   * Se recomienda el uso de las anotaciones de **Lombok** `@Data, @Builder,
-   @NoArgsConstructor`
-
-5. Se define la Entidad a partir de la clase recién creada con `@Entity`. Si se debe cambiar el nombre de la tabla, se
-usa la anotación `@Table(name="[nombre_tabla]")`.
-
-   También se puede agregar la anotación dentro de `@Table` para definir que una columna deba tener un valor único como
-por ejemplo `@Table(name="_user", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})`
-
+2. Se debe crear una nueva base de datos para el proyecto (ya se realizó en los pasos anteriores).
+3. Se establece la conexión con la base de datos a partir de `application.yml`.
+4. Se crea la clase que servirá para autenticar (por ejemplo `User`). Se recomienda tener orden en la creación de la estructura.
+   * Se recomienda el uso de las anotaciones de **Lombok** `@Data, @Builder, @NoArgsConstructor`.
+5. Se define la Entidad a partir de la clase recién creada con `@Entity`. Si se debe cambiar el nombre de la tabla, se usa la anotación `@Table(name="[nombre_tabla]")`. También se puede agregar la anotación dentro de `@Table` para definir que una columna deba tener un valor único como por ejemplo `@Table(name="_user", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})`.
 6. Se define cuál será el dato que sirva como llave primaria con `@Id`.
-   * De ser necesario, se debe establecer la secuencia y el valor que deberá usarse. Para esto se puede hacer con lo
-   siguiente:
+   * De ser necesario, se debe establecer la secuencia y el valor que deberá usarse. Para esto se puede hacer con lo siguiente:
 
     ```java
     @SequenceGenerator(
@@ -384,8 +1265,7 @@ por ejemplo `@Table(name="_user", uniqueConstraints = {@UniqueConstraint(columnN
     )
     ```
 
-7. Con esto ya realizado, se puede correr el proyecto con la intención de verificar que se creen las tablas necesarias en
-la base de datos.
+7. Con esto ya realizado, se puede correr el proyecto con la intención de verificar que se creen las tablas necesarias en la base de datos.
 
 #### Implementación de interfaz `UserDetails`
 
@@ -393,8 +1273,7 @@ Se debe implementar `UserDetails` en la clase creada. Se deben implementar los m
 
 8. Implementación de `getAuthorities()`:
 
-* Se debe crear primero algo que muestre los roles del usuario. Para esto se recomienda un `enum` y se debe agregar a la
-clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)` en este `enum`.
+* Se debe crear primero algo que muestre los roles del usuario. Para esto se recomienda un `enum` y se debe agregar a la clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)` en este `enum`.
 * La implementación puede ser:
 
     ```java
@@ -403,7 +1282,7 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
     ```
-  
+
 9. Implementación de `getUserName()`:
 
 * Si se va a usar el email como usuario, se puede retornar el mismo
@@ -414,7 +1293,7 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
         return email;
     }
     ```
-  
+
 10. Implementación de `isAccountNonExpired()`:
 
 * Se debe asegurar que sea `true`.
@@ -425,7 +1304,7 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
         return true;
     }
     ```
-  
+
 11. Implementación de `isAccountNonLocked()`:
 
 * Debe ser `true` como resultado
@@ -436,7 +1315,7 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
        return true;
     }
     ```
-  
+
 12. Implementación de `isCredentialsNonExpired()`:
 
 * Debe devolver `true` como resultado.
@@ -447,7 +1326,7 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
        return true;
     }
     ```
-  
+
 13. Implementación de `isEnabled()`:
 
 * Debe retornar `true` como resultado.
@@ -458,7 +1337,7 @@ clase del paso 4. Se recomienda usar la anotación `@Enumerated(EnumType.STRING)
        return true;
     }
     ```
-  
+
 14. Si por el uso de Lombok no hay un getter para `password`, es **sumamente recomendable** que se haga un explicito del
 getter de `password`
 
@@ -496,11 +1375,11 @@ que el correo es un atributo único.
     }
     ```
 
-    Esto obliga a implementar los métodos, de `OncePerRequestFilter`, lo cual nos deja con lo siguiente:
+    Esto obliga a implementar los métodos de `OncePerRequestFilter` lo cual nos deja con lo siguiente:
 
     ```java
     import org.springframework.lang.NonNull;
-        
+
     public class JwtAuthenticationFilter extends OncePerRequestFilter {
         @Override
         protected void doFilterInternal(
@@ -508,9 +1387,9 @@ que el correo es un atributo único.
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
         ) throws ServletException, IOException {
-            
+
         }
-    } 
+    }
     ```
 
   De esto, hay que hacer notar lo siguiente:
@@ -529,8 +1408,7 @@ que el correo es un atributo único.
     final String authHeader = request.getHeader("Authorization");
     ```
 
-20. Luego, debemos confirmar que el header es el que se espera. Al mismo tiempo, guardamos el token JWT en su variable.
-Si no se encuentra, entonces quiere decir que se debe continuar con el siguiente filtro en la cadena.
+20. Luego, debemos confirmar que el header es el que se espera. Al mismo tiempo, guardamos el token JWT en su variable. Si no se encuentra, entonces quiere decir que se debe continuar con el siguiente filtro en la cadena.
 
     ```java
     final String jwt;
@@ -548,7 +1426,7 @@ Si no se encuentra, entonces quiere decir que se debe continuar con el siguiente
 
   El valor es 7 porque `"Bearer "` tiene 7 caracteres.
 
-****
+***
 _La clase `JwtAuthenticationFilter` hasta ahora deberá parecer a lo siguiente:_
 
 ```java
@@ -575,12 +1453,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 ```
 
-****
+***
 
 #### Confirmación que existe el usuario y contraseña
 
-Después de extraer el token JWT, debemos llamar a `UserDetailService` para confirmar si el usuario ya existe. Para esto,
-debemos usar un `JWTService` para extraer el usuario. Si se está usando el correo, esto es lo que se usará como usuario.
+Después de extraer el token JWT, debemos llamar a `UserDetailService` para confirmar si el usuario ya existe. Para esto, debemos usar un `JWTService` para extraer el usuario. Si se está usando el correo, esto es lo que se usará como usuario.
 
 22. Extraemos el usuario del `request`, pero para esto vamos a usar otra clase de tipo `JwtService`. Por el momento, lo
 dejaremos como TODO.
@@ -668,11 +1545,9 @@ agregadas, ya podemos continuar en `JwtService`:
 #### Uso de la llave de firmado (SignInKey)
 
 La llave de SignInKey sirve para asegurar que el cliente es quien dice ser.
-27. Se debe crear una llave secreta de al menos 256 bits. Para esto se pueden usar herramientas en línea. Una
-herramienta que puede usarse es <https://www.devglan.com/online-tools/hmac-sha256-online>
+27. Se debe crear una llave secreta de al menos 256 bits. Para esto se pueden usar herramientas en línea. Una herramienta que puede usarse es <https://www.devglan.com/online-tools/hmac-sha256-online>
 
-28. Una vez que se ha creado la llave, se puede usar como variable de entorno y se puede hacer el uso desde el
-`application.yml` agregando lo siguiente
+28. Una vez que se ha creado la llave, se puede usar como variable de entorno y se puede hacer el uso desde el `application.yml` agregando lo siguiente
 
     ```yml
     application:
@@ -687,7 +1562,7 @@ herramienta que puede usarse es <https://www.devglan.com/online-tools/hmac-sha25
     ```java
     @Value("${application.security.jwt.secret_key}")
     private static String SECRET_KEY;
-    
+
     @Value("${application.security.jwt.expiration}")
     private static Long EXPIRATION;
     ```
@@ -759,8 +1634,7 @@ Vamos a implementar la generación de un token JWT.
     }
     ```
 
-Ambos métodos, de ser necesario, pueden ser `private`, y solo se usa otro método para no exponer el método de forma
-directa.
+Ambos métodos, de ser necesario, pueden ser `private`, y solo se usa otro método para no exponer el método de forma directa.
 
 #### Validación de token
 
@@ -788,7 +1662,7 @@ directa.
     }
     ```
 
-****
+***
 _El servicio debería estar como sigue:_
 
 ```java
@@ -796,23 +1670,23 @@ _El servicio debería estar como sigue:_
 public class JwtService {
     @Value("${application.security.jwt.secret_key}")
     private static String SECRET_KEY;
-    
+
     @Value("${application.security.jwt.expiration}")
     private static Long EXPIRATION;
-    
+
     public String extractUsername(String token) {
         return extractClaim(token,Claims::getSubject);
     }
-    
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-    
+
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
-    
+
     public String generateToken(
             Map<String,Object> extraClaims,
             UserDetails userDetails
@@ -831,23 +1705,23 @@ public class JwtService {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-    
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
-    
+
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).isBefore(LocalDateTime.now());
     }
-    
+
     private LocalDateTime extractExpiration(String token) {
         Date date = extractClaim(token, Claims::getExpiration);
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
     }
-    
+
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
@@ -856,7 +1730,7 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-    
+
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
@@ -864,15 +1738,13 @@ public class JwtService {
 }
 ```
 
-****
+***
 
 #### Terminando el proceso de validación
 
 Ahora podemos regresar a `JwtAuthenticationFilter` y terminar los procesos de validación.
 
-36. Primero debemos confirmar si el usuario ya ha sido validado previamente. Esto es para no estar validando hacia la
-base de datos de identidad con cada operación. Para esto, tendremos también que crear un elemento del tipo
-`UserDetailService`, el cual será una implementación propia.
+36. Primero debemos confirmar si el usuario ya ha sido validado previamente. Esto es para no estar validando hacia la base de datos de identidad con cada operación. Para esto, tendremos también que crear un elemento del tipo `UserDetailService`, el cual será una implementación propia.
 
     ```java
     private final UserDetailsService userDetailsService;
@@ -886,8 +1758,7 @@ base de datos de identidad con cada operación. Para esto, tendremos también qu
     }
     ```
 
-37. Ahora, debemos hacer una clase que servirá para configurar algunas inyecciones. Crearemos una clase en un paquete
-`config` llamada `ApplicationConfiguration`.
+37. Ahora, debemos hacer una clase que servirá para configurar algunas inyecciones. Crearemos una clase en un paquete `config` llamada `ApplicationConfiguration`.
 
     Debemos agregarle también las anotaciones de `@Configuration` y `@RequiredArgsConstructor`:
 
@@ -895,7 +1766,7 @@ base de datos de identidad con cada operación. Para esto, tendremos también qu
     @Configuration
     @RequiredArgsConstructor
     public class ApplicationConfig {
-        
+
     }
     ```
 
@@ -911,8 +1782,7 @@ base de datos de identidad con cada operación. Para esto, tendremos también qu
     }
     ```
 
-39. Con el `@Bean` creado, tenemos el requisito que dejamos pendiente en `JwtAuthenticationFilter`. Ahora, podemos terminar
-de valider el usuario, como sigue:
+39. Con el `@Bean` creado, tenemos el requisito que dejamos pendiente en `JwtAuthenticationFilter`. Ahora, podemos terminar de valider el usuario, como sigue:
 
     ```java
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -928,11 +1798,11 @@ de valider el usuario, como sigue:
               );
               SecurityContextHolder.getContext().setAuthentication(authToken);
           }
-    }   
+    }
     ```
 
 Con esto ya está el filtro configurado, y ya solo queda pasarle la batuta al siguiente filtro.
-****
+***
 _La clase debería verse algo como lo que sigue:_
 
 ```java
@@ -941,18 +1811,18 @@ _La clase debería verse algo como lo que sigue:_
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
-        
+
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request,response);
             return;
@@ -978,7 +1848,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 ```
 
-****
+***
 
 #### SecurityConfig
 
@@ -1033,7 +1903,7 @@ cual será un Bean en `ApplicationConfig`
     }   
     ```
 
-   Hay que recordar que el `UserDetailsService`que se está usando es el que se definió en el paso 38.
+   Hay que recordar que el `UserDetailsService` que se está usando es el que se definió en el paso 38.
 
 45. También hay que agregar un encodificador para las contraseñas. Esto se hace con el Bean `passwordEncoder()`, que
 puede ser como sigue:
